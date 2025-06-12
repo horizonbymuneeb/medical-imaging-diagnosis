@@ -43,3 +43,5 @@ def format_number(n: int) -> str:
             return f"{n:.1f}{unit}"
         n /= 1000
     return f"{n:.1f}T"
+
+# Add DICOM loader with metadata extraction [2025-06-12T13:17:06]
