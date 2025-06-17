@@ -178,3 +178,5 @@ if __name__ == '__main__':
 # Implement active learning for label efficiency [2025-06-12T10:31:30]
 
 # Update documentation for clinical deployment [2025-06-13T17:40:02]
+
+# WIP: benchmarking on NIH Chest X-ray dataset [2025-06-17T12:15:02]
