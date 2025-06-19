@@ -45,3 +45,5 @@ def format_number(n: int) -> str:
     return f"{n:.1f}T"
 
 # Add DICOM loader with metadata extraction [2025-06-12T13:17:06]
+
+# Update inference pipeline for batch DICOM [2025-06-19T15:44:18]
