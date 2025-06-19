@@ -180,3 +180,5 @@ if __name__ == '__main__':
 # Update documentation for clinical deployment [2025-06-13T17:40:02]
 
 # WIP: benchmarking on NIH Chest X-ray dataset [2025-06-17T12:15:02]
+
+# Implement class activation mapping overlay [2025-06-19T17:50:05]
