@@ -182,3 +182,5 @@ if __name__ == '__main__':
 # WIP: benchmarking on NIH Chest X-ray dataset [2025-06-17T12:15:02]
 
 # Implement class activation mapping overlay [2025-06-19T17:50:05]
+
+# Add DICOM loader with metadata extraction [2025-06-22T16:09:20]
