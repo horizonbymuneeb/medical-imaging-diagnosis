@@ -49,3 +49,5 @@ def format_number(n: int) -> str:
 # Update inference pipeline for batch DICOM [2025-06-19T15:44:18]
 
 # Implement Grad-CAM explainability heatmaps [2025-06-29T14:45:30]
+
+# Add DICOM loader with metadata extraction [2025-07-01T12:45:42]
