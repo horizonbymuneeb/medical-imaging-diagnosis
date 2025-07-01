@@ -184,3 +184,5 @@ if __name__ == '__main__':
 # Implement class activation mapping overlay [2025-06-19T17:50:05]
 
 # Add DICOM loader with metadata extraction [2025-06-22T16:09:20]
+
+# Update documentation for clinical deployment [2025-07-01T15:42:42]
