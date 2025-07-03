@@ -205,3 +205,4 @@
 [2025-06-29T14:45:30] Implement Grad-CAM explainability heatmaps
 [2025-07-01T15:42:42] Update documentation for clinical deployment
 [2025-07-01T12:45:42] Add DICOM loader with metadata extraction
+[2025-07-03T20:21:39] WIP: tuning loss for imbalanced tumor labels
