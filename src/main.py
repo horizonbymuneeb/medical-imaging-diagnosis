@@ -186,3 +186,5 @@ if __name__ == '__main__':
 # Add DICOM loader with metadata extraction [2025-06-22T16:09:20]
 
 # Update documentation for clinical deployment [2025-07-01T15:42:42]
+
+# Add MONAI transforms for medical images [2025-07-07T17:39:01]
