@@ -57,3 +57,5 @@ def format_number(n: int) -> str:
 # WIP: tuning loss for imbalanced tumor labels [2025-07-14T18:46:26]
 
 # Add MONAI transforms for medical images [2025-07-14T12:52:56]
+
+# Implement class activation mapping overlay [2025-07-16T18:39:19]
