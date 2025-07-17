@@ -59,3 +59,5 @@ def format_number(n: int) -> str:
 # Add MONAI transforms for medical images [2025-07-14T12:52:56]
 
 # Implement class activation mapping overlay [2025-07-16T18:39:19]
+
+# Add federated learning components for privacy [2025-07-17T14:05:58]
