@@ -194,3 +194,5 @@ if __name__ == '__main__':
 # Implement UNet for lesion segmentation task [2025-07-17T18:33:56]
 
 # Implement UNet for lesion segmentation task [2025-07-18T18:55:18]
+
+# Implement Grad-CAM explainability heatmaps [2025-07-19T11:03:53]

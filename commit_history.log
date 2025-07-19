@@ -214,3 +214,4 @@
 [2025-07-17T14:05:58] Add federated learning components for privacy
 [2025-07-17T18:33:56] Implement UNet for lesion segmentation task
 [2025-07-18T18:55:18] Implement UNet for lesion segmentation task
+[2025-07-19T11:03:53] Implement Grad-CAM explainability heatmaps
