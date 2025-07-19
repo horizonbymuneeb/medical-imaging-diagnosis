@@ -216,3 +216,4 @@
 [2025-07-18T18:55:18] Implement UNet for lesion segmentation task
 [2025-07-19T11:03:53] Implement Grad-CAM explainability heatmaps
 [2025-07-19T13:33:06] Update ResNet classifier for 3D volumes
+[2025-07-19T15:33:20] Add MONAI transforms for medical images
