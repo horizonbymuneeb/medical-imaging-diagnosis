@@ -61,3 +61,5 @@ def format_number(n: int) -> str:
 # Implement class activation mapping overlay [2025-07-16T18:39:19]
 
 # Add federated learning components for privacy [2025-07-17T14:05:58]
+
+# Update ResNet classifier for 3D volumes [2025-07-19T13:33:06]
