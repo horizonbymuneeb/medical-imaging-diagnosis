@@ -71,3 +71,5 @@ def format_number(n: int) -> str:
 # WIP: fixing data augmentation pipeline bug [2025-07-23T16:39:46]
 
 # WIP: fixing data augmentation pipeline bug [2025-07-24T20:14:02]
+
+# Implement ensemble of UNet and DeepLab [2025-07-28T17:33:06]
