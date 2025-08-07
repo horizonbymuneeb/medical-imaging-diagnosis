@@ -198,3 +198,5 @@ if __name__ == '__main__':
 # Implement Grad-CAM explainability heatmaps [2025-07-19T11:03:53]
 
 # Fix handling of multi-slice CT scans [2025-08-07T09:04:49]
+
+# Implement 3D volume processing pipeline [2025-08-07T16:38:39]
