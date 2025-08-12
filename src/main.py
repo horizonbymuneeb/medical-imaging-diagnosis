@@ -204,3 +204,5 @@ if __name__ == '__main__':
 # Implement 3D volume processing pipeline [2025-08-09T11:21:59]
 
 # Add MONAI transforms for medical images [2025-08-11T09:20:31]
+
+# Update inference pipeline for batch DICOM [2025-08-12T11:07:50]
