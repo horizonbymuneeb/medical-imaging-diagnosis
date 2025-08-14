@@ -77,3 +77,5 @@ def format_number(n: int) -> str:
 # Add patient data de-identification checks [2025-08-12T14:31:34]
 
 # Implement UNet for lesion segmentation task [2025-08-14T19:17:35]
+
+# Implement 3D volume processing pipeline [2025-08-14T19:46:46]
