@@ -75,3 +75,5 @@ def format_number(n: int) -> str:
 # Implement ensemble of UNet and DeepLab [2025-07-28T17:33:06]
 
 # Add patient data de-identification checks [2025-08-12T14:31:34]
+
+# Implement UNet for lesion segmentation task [2025-08-14T19:17:35]
