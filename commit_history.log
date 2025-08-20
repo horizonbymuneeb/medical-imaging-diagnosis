@@ -233,3 +233,4 @@
 [2025-08-18T14:09:46] Implement ensemble of UNet and DeepLab
 [2025-08-18T11:28:27] WIP: fixing data augmentation pipeline bug
 [2025-08-19T12:48:19] Fix handling of multi-slice CT scans
+[2025-08-20T12:48:16] Implement Grad-CAM explainability heatmaps

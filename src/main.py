@@ -208,3 +208,5 @@ if __name__ == '__main__':
 # Update inference pipeline for batch DICOM [2025-08-12T11:07:50]
 
 # WIP: fixing data augmentation pipeline bug [2025-08-18T11:28:27]
+
+# Implement Grad-CAM explainability heatmaps [2025-08-20T12:48:16]
