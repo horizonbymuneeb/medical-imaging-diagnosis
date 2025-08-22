@@ -85,3 +85,5 @@ def format_number(n: int) -> str:
 # Implement ensemble of UNet and DeepLab [2025-08-18T14:09:46]
 
 # Fix handling of multi-slice CT scans [2025-08-19T12:48:19]
+
+# Add federated learning components for privacy [2025-08-22T13:40:14]
