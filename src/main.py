@@ -210,3 +210,5 @@ if __name__ == '__main__':
 # WIP: fixing data augmentation pipeline bug [2025-08-18T11:28:27]
 
 # Implement Grad-CAM explainability heatmaps [2025-08-20T12:48:16]
+
+# Update documentation for clinical deployment [2025-08-22T13:49:41]
