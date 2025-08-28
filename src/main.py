@@ -214,3 +214,5 @@ if __name__ == '__main__':
 # Update documentation for clinical deployment [2025-08-22T13:49:41]
 
 # WIP: fixing data augmentation pipeline bug [2025-08-24T18:11:54]
+
+# Implement active learning for label efficiency [2025-08-28T09:47:37]
