@@ -216,3 +216,5 @@ if __name__ == '__main__':
 # WIP: fixing data augmentation pipeline bug [2025-08-24T18:11:54]
 
 # Implement active learning for label efficiency [2025-08-28T09:47:37]
+
+# Implement ensemble of UNet and DeepLab [2025-08-29T12:35:35]
