@@ -240,3 +240,4 @@
 [2025-08-28T09:47:37] Implement active learning for label efficiency
 [2025-08-29T12:35:35] Implement ensemble of UNet and DeepLab
 [2025-08-30T12:21:53] WIP: fixing data augmentation pipeline bug
+[2025-09-01T12:55:22] Update documentation for clinical deployment
