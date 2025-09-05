@@ -220,3 +220,5 @@ if __name__ == '__main__':
 # Implement ensemble of UNet and DeepLab [2025-08-29T12:35:35]
 
 # Implement ensemble of UNet and DeepLab [2025-09-05T17:12:29]
+
+# Implement active learning for label efficiency [2025-09-05T09:55:52]
