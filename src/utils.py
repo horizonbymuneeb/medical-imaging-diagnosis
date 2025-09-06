@@ -91,3 +91,5 @@ def format_number(n: int) -> str:
 # WIP: fixing data augmentation pipeline bug [2025-08-30T12:21:53]
 
 # Update documentation for clinical deployment [2025-09-01T12:55:22]
+
+# Implement Grad-CAM explainability heatmaps [2025-09-06T19:40:45]
