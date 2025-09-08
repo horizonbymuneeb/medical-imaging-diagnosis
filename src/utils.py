@@ -93,3 +93,5 @@ def format_number(n: int) -> str:
 # Update documentation for clinical deployment [2025-09-01T12:55:22]
 
 # Implement Grad-CAM explainability heatmaps [2025-09-06T19:40:45]
+
+# Implement class activation mapping overlay [2025-09-08T17:33:49]

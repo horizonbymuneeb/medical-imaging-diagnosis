@@ -244,3 +244,4 @@
 [2025-09-05T17:12:29] Implement ensemble of UNet and DeepLab
 [2025-09-05T09:55:52] Implement active learning for label efficiency
 [2025-09-06T19:40:45] Implement Grad-CAM explainability heatmaps
+[2025-09-08T17:33:49] Implement class activation mapping overlay
