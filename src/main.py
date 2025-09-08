@@ -222,3 +222,5 @@ if __name__ == '__main__':
 # Implement ensemble of UNet and DeepLab [2025-09-05T17:12:29]
 
 # Implement active learning for label efficiency [2025-09-05T09:55:52]
+
+# Add patient data de-identification checks [2025-09-08T09:56:08]
