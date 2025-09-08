@@ -246,3 +246,4 @@
 [2025-09-06T19:40:45] Implement Grad-CAM explainability heatmaps
 [2025-09-08T17:33:49] Implement class activation mapping overlay
 [2025-09-08T09:56:08] Add patient data de-identification checks
+[2025-09-08T14:08:23] Implement Grad-CAM explainability heatmaps
