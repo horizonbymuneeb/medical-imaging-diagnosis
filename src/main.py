@@ -226,3 +226,5 @@ if __name__ == '__main__':
 # Add patient data de-identification checks [2025-09-08T09:56:08]
 
 # Implement ensemble of UNet and DeepLab [2025-09-12T10:22:44]
+
+# Implement class activation mapping overlay [2025-09-12T18:59:28]

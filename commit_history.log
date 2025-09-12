@@ -249,3 +249,4 @@
 [2025-09-08T14:08:23] Implement Grad-CAM explainability heatmaps
 [2025-09-08T15:50:02] Update inference pipeline for batch DICOM
 [2025-09-12T10:22:44] Implement ensemble of UNet and DeepLab
+[2025-09-12T18:59:28] Implement class activation mapping overlay
