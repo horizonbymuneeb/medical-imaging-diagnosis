@@ -228,3 +228,5 @@ if __name__ == '__main__':
 # Implement ensemble of UNet and DeepLab [2025-09-12T10:22:44]
 
 # Implement class activation mapping overlay [2025-09-12T18:59:28]
+
+# Implement UNet for lesion segmentation task [2025-09-22T10:45:58]
