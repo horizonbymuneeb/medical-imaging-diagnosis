@@ -253,3 +253,4 @@
 [2025-09-22T11:07:19] Update inference pipeline for batch DICOM
 [2025-09-22T10:45:58] Implement UNet for lesion segmentation task
 [2025-09-23T11:11:30] Implement 3D volume processing pipeline
+[2025-09-25T14:40:57] Add MONAI transforms for medical images
