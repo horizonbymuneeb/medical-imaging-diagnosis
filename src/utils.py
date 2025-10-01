@@ -107,3 +107,5 @@ def format_number(n: int) -> str:
 # WIP: fixing data augmentation pipeline bug [2025-09-26T14:26:40]
 
 # Update CI pipeline for medical compliance [2025-09-29T11:04:56]
+
+# Add MONAI transforms for medical images [2025-10-01T19:42:53]
