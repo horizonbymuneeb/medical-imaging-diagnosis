@@ -232,3 +232,5 @@ if __name__ == '__main__':
 # Implement UNet for lesion segmentation task [2025-09-22T10:45:58]
 
 # Implement 3D volume processing pipeline [2025-09-23T11:11:30]
+
+# Add MONAI transforms for medical images [2025-10-11T13:44:32]
