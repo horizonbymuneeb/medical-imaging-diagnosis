@@ -234,3 +234,5 @@ if __name__ == '__main__':
 # Implement 3D volume processing pipeline [2025-09-23T11:11:30]
 
 # Add MONAI transforms for medical images [2025-10-11T13:44:32]
+
+# WIP: benchmarking on NIH Chest X-ray dataset [2025-10-13T14:24:16]
