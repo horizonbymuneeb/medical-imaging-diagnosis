@@ -263,3 +263,4 @@
 [2025-10-13T12:50:56] Add test-time augmentation for robust predictions
 [2025-10-14T12:40:00] Add MONAI transforms for medical images
 [2025-10-16T11:35:11] Implement class activation mapping overlay
+[2025-10-16T10:40:16] Implement ensemble of UNet and DeepLab
