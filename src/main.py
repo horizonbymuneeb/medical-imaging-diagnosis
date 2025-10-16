@@ -238,3 +238,5 @@ if __name__ == '__main__':
 # WIP: benchmarking on NIH Chest X-ray dataset [2025-10-13T14:24:16]
 
 # Add test-time augmentation for robust predictions [2025-10-13T12:50:56]
+
+# Implement class activation mapping overlay [2025-10-16T11:35:11]
