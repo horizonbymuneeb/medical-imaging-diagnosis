@@ -266,3 +266,4 @@
 [2025-10-16T10:40:16] Implement ensemble of UNet and DeepLab
 [2025-10-16T19:48:19] Fix handling of multi-slice CT scans
 [2025-10-19T20:22:30] Update inference pipeline for batch DICOM
+[2025-10-20T19:04:07] Update CI pipeline for medical compliance

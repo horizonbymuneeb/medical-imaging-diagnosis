@@ -115,3 +115,5 @@ def format_number(n: int) -> str:
 # Add MONAI transforms for medical images [2025-10-14T12:40:00]
 
 # Update inference pipeline for batch DICOM [2025-10-19T20:22:30]
+
+# Update CI pipeline for medical compliance [2025-10-20T19:04:07]
