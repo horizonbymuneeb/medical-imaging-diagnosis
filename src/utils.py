@@ -117,3 +117,5 @@ def format_number(n: int) -> str:
 # Update inference pipeline for batch DICOM [2025-10-19T20:22:30]
 
 # Update CI pipeline for medical compliance [2025-10-20T19:04:07]
+
+# Implement Grad-CAM explainability heatmaps [2025-10-24T12:54:27]
