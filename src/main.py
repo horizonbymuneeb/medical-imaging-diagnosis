@@ -246,3 +246,5 @@ if __name__ == '__main__':
 # Fix handling of multi-slice CT scans [2025-10-16T19:48:19]
 
 # Fix handling of multi-slice CT scans [2025-10-24T16:54:13]
+
+# Implement class activation mapping overlay [2025-10-31T20:08:09]
