@@ -250,3 +250,5 @@ if __name__ == '__main__':
 # Implement class activation mapping overlay [2025-10-31T20:08:09]
 
 # WIP: benchmarking on NIH Chest X-ray dataset [2025-11-05T19:58:25]
+
+# Update inference pipeline for batch DICOM [2025-11-06T16:51:28]
