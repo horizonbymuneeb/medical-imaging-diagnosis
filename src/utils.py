@@ -123,3 +123,5 @@ def format_number(n: int) -> str:
 # Implement 3D volume processing pipeline [2025-10-25T10:34:22]
 
 # Implement class activation mapping overlay [2025-11-07T14:33:27]
+
+# Add DICOM loader with metadata extraction [2025-11-07T18:26:47]

@@ -275,3 +275,4 @@
 [2025-11-06T16:51:28] Update inference pipeline for batch DICOM
 [2025-11-07T19:16:10] Add test-time augmentation for robust predictions
 [2025-11-07T14:33:27] Implement class activation mapping overlay
+[2025-11-07T18:26:47] Add DICOM loader with metadata extraction
