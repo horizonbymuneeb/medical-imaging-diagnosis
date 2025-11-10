@@ -254,3 +254,5 @@ if __name__ == '__main__':
 # Update inference pipeline for batch DICOM [2025-11-06T16:51:28]
 
 # Add test-time augmentation for robust predictions [2025-11-07T19:16:10]
+
+# Add MONAI transforms for medical images [2025-11-10T20:48:16]
