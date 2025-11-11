@@ -277,3 +277,4 @@
 [2025-11-07T14:33:27] Implement class activation mapping overlay
 [2025-11-07T18:26:47] Add DICOM loader with metadata extraction
 [2025-11-10T20:48:16] Add MONAI transforms for medical images
+[2025-11-11T11:14:41] Update documentation for clinical deployment

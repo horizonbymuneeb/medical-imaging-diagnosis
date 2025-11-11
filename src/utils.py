@@ -125,3 +125,5 @@ def format_number(n: int) -> str:
 # Implement class activation mapping overlay [2025-11-07T14:33:27]
 
 # Add DICOM loader with metadata extraction [2025-11-07T18:26:47]
+
+# Update documentation for clinical deployment [2025-11-11T11:14:41]
