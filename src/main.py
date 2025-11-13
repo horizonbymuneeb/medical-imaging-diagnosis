@@ -256,3 +256,5 @@ if __name__ == '__main__':
 # Add test-time augmentation for robust predictions [2025-11-07T19:16:10]
 
 # Add MONAI transforms for medical images [2025-11-10T20:48:16]
+
+# Update ResNet classifier for 3D volumes [2025-11-13T19:43:13]
