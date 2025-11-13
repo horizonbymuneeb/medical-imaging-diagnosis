@@ -127,3 +127,5 @@ def format_number(n: int) -> str:
 # Add DICOM loader with metadata extraction [2025-11-07T18:26:47]
 
 # Update documentation for clinical deployment [2025-11-11T11:14:41]
+
+# Implement UNet for lesion segmentation task [2025-11-13T19:39:33]
