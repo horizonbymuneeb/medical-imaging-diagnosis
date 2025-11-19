@@ -258,3 +258,5 @@ if __name__ == '__main__':
 # Add MONAI transforms for medical images [2025-11-10T20:48:16]
 
 # Update ResNet classifier for 3D volumes [2025-11-13T19:43:13]
+
+# Add DICOM loader with metadata extraction [2025-11-19T09:55:41]
