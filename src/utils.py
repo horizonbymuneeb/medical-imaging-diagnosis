@@ -129,3 +129,5 @@ def format_number(n: int) -> str:
 # Update documentation for clinical deployment [2025-11-11T11:14:41]
 
 # Implement UNet for lesion segmentation task [2025-11-13T19:39:33]
+
+# Implement ensemble of UNet and DeepLab [2025-11-20T12:39:45]
