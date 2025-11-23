@@ -131,3 +131,5 @@ def format_number(n: int) -> str:
 # Implement UNet for lesion segmentation task [2025-11-13T19:39:33]
 
 # Implement ensemble of UNet and DeepLab [2025-11-20T12:39:45]
+
+# Implement class activation mapping overlay [2025-11-23T18:14:14]

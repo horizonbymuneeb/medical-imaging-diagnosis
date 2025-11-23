@@ -282,3 +282,4 @@
 [2025-11-13T19:43:13] Update ResNet classifier for 3D volumes
 [2025-11-19T09:55:41] Add DICOM loader with metadata extraction
 [2025-11-20T12:39:45] Implement ensemble of UNet and DeepLab
+[2025-11-23T18:14:14] Implement class activation mapping overlay
