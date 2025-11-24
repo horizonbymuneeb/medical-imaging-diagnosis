@@ -260,3 +260,5 @@ if __name__ == '__main__':
 # Update ResNet classifier for 3D volumes [2025-11-13T19:43:13]
 
 # Add DICOM loader with metadata extraction [2025-11-19T09:55:41]
+
+# Add test-time augmentation for robust predictions [2025-11-24T16:30:18]
