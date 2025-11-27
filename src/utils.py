@@ -133,3 +133,5 @@ def format_number(n: int) -> str:
 # Implement ensemble of UNet and DeepLab [2025-11-20T12:39:45]
 
 # Implement class activation mapping overlay [2025-11-23T18:14:14]
+
+# WIP: benchmarking on NIH Chest X-ray dataset [2025-11-27T15:46:06]
