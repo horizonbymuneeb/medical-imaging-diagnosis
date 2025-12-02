@@ -135,3 +135,5 @@ def format_number(n: int) -> str:
 # Implement class activation mapping overlay [2025-11-23T18:14:14]
 
 # WIP: benchmarking on NIH Chest X-ray dataset [2025-11-27T15:46:06]
+
+# WIP: tuning loss for imbalanced tumor labels [2025-12-02T11:27:12]
