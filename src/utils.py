@@ -139,3 +139,5 @@ def format_number(n: int) -> str:
 # WIP: tuning loss for imbalanced tumor labels [2025-12-02T11:27:12]
 
 # Update ResNet classifier for 3D volumes [2025-12-04T16:19:12]
+
+# Add federated learning components for privacy [2025-12-04T11:44:10]
