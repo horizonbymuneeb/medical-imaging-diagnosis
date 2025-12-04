@@ -137,3 +137,5 @@ def format_number(n: int) -> str:
 # WIP: benchmarking on NIH Chest X-ray dataset [2025-11-27T15:46:06]
 
 # WIP: tuning loss for imbalanced tumor labels [2025-12-02T11:27:12]
+
+# Update ResNet classifier for 3D volumes [2025-12-04T16:19:12]

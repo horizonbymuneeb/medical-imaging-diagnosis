@@ -288,3 +288,4 @@
 [2025-11-30T16:32:10] Implement 3D volume processing pipeline
 [2025-12-02T11:27:12] WIP: tuning loss for imbalanced tumor labels
 [2025-12-03T19:25:42] Add federated learning components for privacy
+[2025-12-04T16:19:12] Update ResNet classifier for 3D volumes
