@@ -290,3 +290,4 @@
 [2025-12-03T19:25:42] Add federated learning components for privacy
 [2025-12-04T16:19:12] Update ResNet classifier for 3D volumes
 [2025-12-04T11:44:10] Add federated learning components for privacy
+[2025-12-05T17:10:05] Implement Grad-CAM explainability heatmaps
