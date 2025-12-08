@@ -268,3 +268,5 @@ if __name__ == '__main__':
 # Add federated learning components for privacy [2025-12-03T19:25:42]
 
 # Implement Grad-CAM explainability heatmaps [2025-12-05T17:10:05]
+
+# Implement class activation mapping overlay [2025-12-08T15:17:19]
