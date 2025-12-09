@@ -143,3 +143,5 @@ def format_number(n: int) -> str:
 # Add federated learning components for privacy [2025-12-04T11:44:10]
 
 # Implement 3D volume processing pipeline [2025-12-08T10:19:25]
+
+# Implement Grad-CAM explainability heatmaps [2025-12-09T19:26:52]
