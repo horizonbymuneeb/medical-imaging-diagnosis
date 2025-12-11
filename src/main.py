@@ -270,3 +270,5 @@ if __name__ == '__main__':
 # Implement Grad-CAM explainability heatmaps [2025-12-05T17:10:05]
 
 # Implement class activation mapping overlay [2025-12-08T15:17:19]
+
+# Add test-time augmentation for robust predictions [2025-12-11T09:30:41]
