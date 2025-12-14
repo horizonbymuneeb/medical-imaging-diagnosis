@@ -272,3 +272,5 @@ if __name__ == '__main__':
 # Implement class activation mapping overlay [2025-12-08T15:17:19]
 
 # Add test-time augmentation for robust predictions [2025-12-11T09:30:41]
+
+# Implement UNet for lesion segmentation task [2025-12-14T14:27:06]
