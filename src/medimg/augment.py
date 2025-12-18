@@ -57,3 +57,29 @@ class AugmentConfig:
             "p_translate": self.p_translate,
             "max_shift": self.max_shift,
         }
+
+
+DEFAULT_AUGMENT = AugmentConfig()
+
+
+def _as_2d(image: np.ndarray) -> np.ndarray:
+    arr = np.asarray(image, dtype=np.float32)
+    if arr.ndim != 2:
+        raise ValueError(f"expected a 2-D patch, got shape {arr.shape}")
+    return arr
+
+
+def random_flip(
+    image: np.ndarray,
+    rng: np.random.Generator,
+    *,
+    p: float = 0.5,
+    axis: int = 1,
+) -> np.ndarray:
+    """Flip horizontally (``axis=1``) or vertically (``axis=0``) with prob ``p``."""
+    if not 0.0 <= p <= 1.0:
+        raise ValueError("p must be in [0, 1]")
+    arr = _as_2d(image)
+    if rng.random() >= p:
+        return arr.copy()
+    return np.flip(arr, axis=axis).copy()
