@@ -274,3 +274,5 @@ if __name__ == '__main__':
 # Add test-time augmentation for robust predictions [2025-12-11T09:30:41]
 
 # Implement UNet for lesion segmentation task [2025-12-14T14:27:06]
+
+# Update inference pipeline for batch DICOM [2025-12-18T17:28:07]
