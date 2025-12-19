@@ -135,3 +135,54 @@ def random_gamma(
     gamma = float(rng.uniform(low, high))
     clipped = np.clip(arr, 0.0, 1.0)
     return np.power(clipped, gamma).astype(np.float32)
+
+
+def random_gaussian_noise(
+    image: np.ndarray,
+    rng: np.random.Generator,
+    *,
+    p: float = 0.3,
+    std: float = 0.02,
+) -> np.ndarray:
+    if std < 0:
+        raise ValueError("std must be non-negative")
+    arr = _as_2d(image)
+    if rng.random() >= p:
+        return arr.copy()
+    noise = rng.normal(0.0, std, size=arr.shape).astype(np.float32)
+    return np.clip(arr + noise, 0.0, 1.0)
+
+
+def translate_pair(
+    image: np.ndarray,
+    mask: np.ndarray,
+    rng: np.random.Generator,
+    *,
+    p: float = 0.5,
+    max_shift: int = 2,
+    pad_value: float = 0.0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Shift an image and its mask by the same offset.
+
+    Shifting only the image is the classic label-destroying bug: the lesion
+    leaves the patch while the label still says positive.
+    """
+    arr = _as_2d(image)
+    m = np.asarray(mask)
+    if m.shape != arr.shape:
+        raise ValueError("image and mask must share a shape")
+    if max_shift < 0:
+        raise ValueError("max_shift must be non-negative")
+    if rng.random() >= p or max_shift == 0:
+        return arr.copy(), m.copy()
+    dy = int(rng.integers(-max_shift, max_shift + 1))
+    dx = int(rng.integers(-max_shift, max_shift + 1))
+    shifted_img = np.full_like(arr, pad_value, dtype=np.float32)
+    shifted_mask = np.zeros_like(m)
+    src_y = slice(max(0, -dy), arr.shape[0] - max(0, dy))
+    dst_y = slice(max(0, dy), arr.shape[0] - max(0, -dy))
+    src_x = slice(max(0, -dx), arr.shape[1] - max(0, dx))
+    dst_x = slice(max(0, dx), arr.shape[1] - max(0, -dx))
+    shifted_img[dst_y, dst_x] = arr[src_y, src_x]
+    shifted_mask[dst_y, dst_x] = m[src_y, src_x]
+    return shifted_img, shifted_mask
