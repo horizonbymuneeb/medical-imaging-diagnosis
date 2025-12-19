@@ -276,3 +276,5 @@ if __name__ == '__main__':
 # Implement UNet for lesion segmentation task [2025-12-14T14:27:06]
 
 # Update inference pipeline for batch DICOM [2025-12-18T17:28:07]
+
+# Add MONAI transforms for medical images [2025-12-19T19:38:59]
