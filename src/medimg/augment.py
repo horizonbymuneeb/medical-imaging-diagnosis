@@ -83,3 +83,55 @@ def random_flip(
     if rng.random() >= p:
         return arr.copy()
     return np.flip(arr, axis=axis).copy()
+
+
+def random_rot90(image: np.ndarray, rng: np.random.Generator, *, p: float = 0.5) -> np.ndarray:
+    """Rotate by a random multiple of 90 degrees (label preserving)."""
+    if not 0.0 <= p <= 1.0:
+        raise ValueError("p must be in [0, 1]")
+    arr = _as_2d(image)
+    if rng.random() >= p:
+        return arr.copy()
+    k = int(rng.integers(1, 4))
+    return np.ascontiguousarray(np.rot90(arr, k))
+
+
+def random_intensity_scale(
+    image: np.ndarray,
+    rng: np.random.Generator,
+    *,
+    p: float = 0.3,
+    low: float = 0.9,
+    high: float = 1.1,
+) -> np.ndarray:
+    """Multiply intensities by a factor drawn from ``[low, high]``."""
+    if low <= 0 or high <= 0 or low > high:
+        raise ValueError("scale bounds must be positive and ordered")
+    arr = _as_2d(image)
+    if rng.random() >= p:
+        return arr.copy()
+    factor = float(rng.uniform(low, high))
+    return (arr * factor).astype(np.float32)
+
+
+def random_gamma(
+    image: np.ndarray,
+    rng: np.random.Generator,
+    *,
+    p: float = 0.3,
+    low: float = 0.8,
+    high: float = 1.25,
+) -> np.ndarray:
+    """Gamma-adjust a patch that is already in ``[0, 1]``.
+
+    The patch is clipped to ``[0, 1]`` first because ``x ** gamma`` on negative
+    values produces NaN and would poison the whole batch.
+    """
+    if low <= 0 or high <= 0 or low > high:
+        raise ValueError("gamma bounds must be positive and ordered")
+    arr = _as_2d(image)
+    if rng.random() >= p:
+        return arr.copy()
+    gamma = float(rng.uniform(low, high))
+    clipped = np.clip(arr, 0.0, 1.0)
+    return np.power(clipped, gamma).astype(np.float32)
