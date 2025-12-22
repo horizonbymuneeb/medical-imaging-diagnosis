@@ -278,3 +278,5 @@ if __name__ == '__main__':
 # Update inference pipeline for batch DICOM [2025-12-18T17:28:07]
 
 # Add MONAI transforms for medical images [2025-12-19T19:38:59]
+
+# Add patient data de-identification checks [2025-12-22T17:24:35]
