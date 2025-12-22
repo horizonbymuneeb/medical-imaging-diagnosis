@@ -186,3 +186,24 @@ def translate_pair(
     shifted_img[dst_y, dst_x] = arr[src_y, src_x]
     shifted_mask[dst_y, dst_x] = m[src_y, src_x]
     return shifted_img, shifted_mask
+
+
+def augment_image(
+    image: np.ndarray,
+    cfg: AugmentConfig = DEFAULT_AUGMENT,
+    *,
+    seed: int | None = None,
+    rng: np.random.Generator | None = None,
+) -> np.ndarray:
+    """Apply the full label-safe pipeline to one patch."""
+    if rng is None:
+        rng = np.random.default_rng(seed)
+    out = _as_2d(image)
+    out = random_flip(out, rng, p=cfg.p_flip)
+    out = random_rot90(out, rng, p=cfg.p_rot90)
+    out = random_gamma(out, rng, p=cfg.p_gamma, low=cfg.gamma_range[0], high=cfg.gamma_range[1])
+    out = random_intensity_scale(
+        out, rng, p=cfg.p_scale, low=cfg.scale_range[0], high=cfg.scale_range[1]
+    )
+    out = random_gaussian_noise(out, rng, p=cfg.p_noise, std=cfg.noise_std)
+    return np.clip(out, 0.0, 1.0).astype(np.float32)
