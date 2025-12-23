@@ -207,3 +207,61 @@ def augment_image(
     )
     out = random_gaussian_noise(out, rng, p=cfg.p_noise, std=cfg.noise_std)
     return np.clip(out, 0.0, 1.0).astype(np.float32)
+
+
+def augment_batch(
+    images: np.ndarray,
+    cfg: AugmentConfig = DEFAULT_AUGMENT,
+    *,
+    seed: int = 0,
+) -> np.ndarray:
+    """Augment a ``(N, H, W)`` or ``(N, 1, H, W)`` batch with one shared seed."""
+    arr = np.asarray(images, dtype=np.float32)
+    rng = np.random.default_rng(seed)
+    if arr.ndim == 4:
+        return np.stack(
+            [augment_image(arr[i, 0], cfg, rng=rng)[None, ...] for i in range(arr.shape[0])],
+            axis=0,
+        )
+    if arr.ndim == 3:
+        return np.stack([augment_image(arr[i], cfg, rng=rng) for i in range(arr.shape[0])], axis=0)
+    raise ValueError(f"expected 3-D or 4-D batch, got shape {arr.shape}")
+
+
+def augment_patches(
+    patches: Iterable,
+    cfg: AugmentConfig = DEFAULT_AUGMENT,
+    *,
+    seed: int = 0,
+) -> list:
+    """Augment a list of :class:`~src.medimg.patching.Patch` objects.
+
+    Labels are copied unchanged: none of the enabled transforms can move the
+    lesion out of the patch.
+    """
+    from src.medimg.patching import Patch
+
+    rng = np.random.default_rng(seed)
+    out = []
+    for patch in patches:
+        out.append(
+            Patch(
+                image=augment_image(patch.image, cfg, rng=rng),
+                label=patch.label,
+                center=patch.center,
+                source_index=patch.source_index,
+            )
+        )
+    return out
+
+
+def augmentation_summary(cfg: AugmentConfig) -> dict[str, float]:
+    """Expected probability that a patch is touched at least once."""
+    untouched = (1 - cfg.p_flip) * (1 - cfg.p_rot90) * (1 - cfg.p_gamma) * (1 - cfg.p_scale) * (1 - cfg.p_noise)
+    return {
+        "p_modified": float(1.0 - untouched),
+        "p_unchanged": float(untouched),
+        "expected_transforms": float(
+            cfg.p_flip + cfg.p_rot90 + cfg.p_gamma + cfg.p_scale + cfg.p_noise
+        ),
+    }
