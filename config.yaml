@@ -1,0 +1,41 @@
+# Tunables read by src.medimg.config.load_config and threaded through the pipeline.
+phantom:
+  shape: [64, 64, 48]        # (rows, cols, slices)
+  spacing: [1.5, 1.5, 2.0]   # mm per voxel, (x, y, z)
+  lesion_radius_mm: 6.0
+  noise_sigma: 18.0          # Gaussian noise added in HU
+  seed: 7
+
+windowing:
+  preset: brain              # brain | lung | abdomen
+  normalize: minmax          # minmax | zscore | percentile
+
+patching:
+  patch_size: 32
+  positive_fraction: 0.5
+  patches_per_epoch: 96
+
+augment:
+  p_flip: 0.5
+  p_rot90: 0.5
+  p_gamma: 0.3
+  gamma_range: [0.8, 1.25]
+  p_noise: 0.3
+  noise_std: 0.02
+  p_scale: 0.3
+  scale_range: [0.9, 1.1]
+
+model:
+  in_channels: 1
+  base_channels: 16
+  dropout: 0.1
+
+train:
+  epochs: 6
+  batch_size: 16
+  lr: 0.003
+  weight_decay: 0.0001
+  patience: 2
+  min_delta: 0.001
+  seed: 11
+  val_fraction: 0.25
