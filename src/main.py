@@ -280,3 +280,5 @@ if __name__ == '__main__':
 # Add MONAI transforms for medical images [2025-12-19T19:38:59]
 
 # Add patient data de-identification checks [2025-12-22T17:24:35]
+
+# Implement class activation mapping overlay [2025-12-26T16:03:42]
