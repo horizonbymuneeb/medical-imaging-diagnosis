@@ -12,3 +12,29 @@ from dataclasses import dataclass
 
 import numpy as np
 from scipy import optimize, special
+
+
+@dataclass(frozen=True)
+class CalibrationBin:
+    """One bin of a reliability diagram."""
+
+    lower: float
+    upper: float
+    count: int
+    mean_confidence: float
+    accuracy: float
+
+    @property
+    def gap(self) -> float:
+        """Signed calibration gap (accuracy minus confidence)."""
+        return float(self.accuracy - self.mean_confidence)
+
+    def to_dict(self) -> dict[str, float | int]:
+        return {
+            "lower": self.lower,
+            "upper": self.upper,
+            "count": self.count,
+            "mean_confidence": self.mean_confidence,
+            "accuracy": self.accuracy,
+            "gap": self.gap,
+        }
