@@ -282,3 +282,5 @@ if __name__ == '__main__':
 # Add patient data de-identification checks [2025-12-22T17:24:35]
 
 # Implement class activation mapping overlay [2025-12-26T16:03:42]
+
+# Update inference pipeline for batch DICOM [2025-12-27T17:10:25]
