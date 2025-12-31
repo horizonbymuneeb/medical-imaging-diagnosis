@@ -284,3 +284,5 @@ if __name__ == '__main__':
 # Implement class activation mapping overlay [2025-12-26T16:03:42]
 
 # Update inference pipeline for batch DICOM [2025-12-27T17:10:25]
+
+# Implement ensemble of UNet and DeepLab [2025-12-31T19:27:01]
