@@ -47,3 +47,26 @@ def test_flip_with_probability_one_is_exact_flip():
     assert np.array_equal(flipped, np.flip(image, axis=1))
     vertical = random_flip(image, rng, p=1.0, axis=0)
     assert np.array_equal(vertical, np.flip(image, axis=0))
+
+
+def test_flip_with_probability_zero_is_identity_copy():
+    image = checkerboard()
+    out = random_flip(image, np.random.default_rng(0), p=0.0)
+    assert np.array_equal(out, image)
+    assert out is not image
+
+
+def test_rot90_preserves_shape_and_value_multiset():
+    image = checkerboard(7)
+    out = random_rot90(image, np.random.default_rng(3), p=1.0)
+    assert out.shape == image.shape
+    assert sorted(out.ravel().tolist()) == sorted(image.ravel().tolist())
+    identity = random_rot90(image, np.random.default_rng(3), p=0.0)
+    assert np.array_equal(identity, image)
+
+
+def test_gamma_with_unity_is_identity():
+    image = np.linspace(0.0, 1.0, 64, dtype=np.float32).reshape(8, 8)
+    rng = np.random.default_rng(4)
+    out = random_gamma(image, rng, p=1.0, low=1.0, high=1.0)
+    assert np.allclose(out, image, atol=1e-6)
