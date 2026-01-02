@@ -70,3 +70,25 @@ def test_gamma_with_unity_is_identity():
     rng = np.random.default_rng(4)
     out = random_gamma(image, rng, p=1.0, low=1.0, high=1.0)
     assert np.allclose(out, image, atol=1e-6)
+
+
+def test_gamma_handles_out_of_range_values_without_nan():
+    image = np.array([[-2.0, 0.5], [1.5, 0.0]], dtype=np.float32)
+    out = random_gamma(image, np.random.default_rng(0), p=1.0, low=2.0, high=2.0)
+    assert np.isfinite(out).all()
+    assert out.min() >= 0.0 and out.max() <= 1.0
+
+
+def test_intensity_scale_respects_range():
+    image = np.ones((4, 4), dtype=np.float32)
+    out = random_intensity_scale(image, np.random.default_rng(5), p=1.0, low=2.0, high=2.0)
+    assert np.allclose(out, 2.0)
+    unchanged = random_intensity_scale(image, np.random.default_rng(5), p=0.0)
+    assert np.allclose(unchanged, 1.0)
+
+
+def test_gaussian_noise_std_and_clip():
+    image = np.full((64, 64), 0.5, dtype=np.float32)
+    out = random_gaussian_noise(image, np.random.default_rng(6), p=1.0, std=0.05)
+    assert out.min() >= 0.0 and out.max() <= 1.0
+    assert float(out.std()) == pytest.approx(0.05, rel=0.15)

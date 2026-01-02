@@ -86,3 +86,15 @@ def reliability_curve(
             )
         )
     return bins
+
+
+def expected_calibration_error(
+    probs: np.ndarray,
+    labels: np.ndarray,
+    n_bins: int = 10,
+) -> float:
+    """Weighted mean absolute gap between confidence and accuracy."""
+    p, y = _check(probs, labels)
+    bins = reliability_curve(p, y, n_bins)
+    total = float(len(p))
+    return float(sum(b.count / total * abs(b.gap) for b in bins))
