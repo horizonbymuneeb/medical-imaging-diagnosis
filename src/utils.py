@@ -153,3 +153,5 @@ def format_number(n: int) -> str:
 # Add federated learning components for privacy [2025-12-23T17:07:22]
 
 # Update documentation for clinical deployment [2025-12-26T17:58:18]
+
+# Add DICOM loader with metadata extraction [2026-01-02T16:23:46]
