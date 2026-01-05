@@ -155,3 +155,5 @@ def format_number(n: int) -> str:
 # Update documentation for clinical deployment [2025-12-26T17:58:18]
 
 # Add DICOM loader with metadata extraction [2026-01-02T16:23:46]
+
+# Add DICOM loader with metadata extraction [2026-01-05T12:37:31]

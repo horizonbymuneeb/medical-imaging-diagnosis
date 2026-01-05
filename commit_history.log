@@ -307,3 +307,4 @@
 [2025-12-27T17:10:25] Update inference pipeline for batch DICOM
 [2025-12-31T19:27:01] Implement ensemble of UNet and DeepLab
 [2026-01-02T16:23:46] Add DICOM loader with metadata extraction
+[2026-01-05T12:37:31] Add DICOM loader with metadata extraction
