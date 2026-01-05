@@ -98,3 +98,29 @@ def expected_calibration_error(
     bins = reliability_curve(p, y, n_bins)
     total = float(len(p))
     return float(sum(b.count / total * abs(b.gap) for b in bins))
+
+
+def maximum_calibration_error(
+    probs: np.ndarray,
+    labels: np.ndarray,
+    n_bins: int = 10,
+) -> float:
+    """Largest single-bin gap, which ECE can hide."""
+    bins = reliability_curve(probs, labels, n_bins)
+    if not bins:
+        raise ValueError("no bins")
+    return float(max(abs(b.gap) for b in bins))
+
+
+def brier_score(probs: np.ndarray, labels: np.ndarray) -> float:
+    """Mean squared error between probability and outcome."""
+    p, y = _check(probs, labels)
+    return float(np.mean((p - y) ** 2))
+
+
+def apply_temperature(logits: np.ndarray, temperature: float) -> np.ndarray:
+    """Sigmoid probabilities after dividing the logits by ``temperature``."""
+    if temperature <= 0:
+        raise ValueError("temperature must be positive")
+    logits = np.asarray(logits, dtype=np.float64).ravel()
+    return special.expit(logits / float(temperature))
