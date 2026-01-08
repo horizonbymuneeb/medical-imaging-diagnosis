@@ -92,3 +92,34 @@ def test_gaussian_noise_std_and_clip():
     out = random_gaussian_noise(image, np.random.default_rng(6), p=1.0, std=0.05)
     assert out.min() >= 0.0 and out.max() <= 1.0
     assert float(out.std()) == pytest.approx(0.05, rel=0.15)
+
+
+def test_translate_pair_moves_image_and_mask_together():
+    image = np.zeros((10, 10), dtype=np.float32)
+    mask = np.zeros((10, 10), dtype=bool)
+    image[4:6, 4:6] = 1.0
+    mask[4:6, 4:6] = True
+    rng = np.random.default_rng(7)
+    shifted_image, shifted_mask = translate_pair(
+        image, mask, rng, p=1.0, max_shift=2
+    )
+    assert np.array_equal(shifted_image > 0, shifted_mask)
+    assert shifted_mask.sum() == mask.sum()
+    assert shifted_image.shape == image.shape
+
+
+def test_translate_pair_rejects_shape_mismatch():
+    with pytest.raises(ValueError):
+        translate_pair(np.zeros((4, 4)), np.zeros((4, 5), dtype=bool), np.random.default_rng(0))
+
+
+def test_augment_image_is_bounded_and_seeded():
+    image = np.linspace(0.0, 1.0, 64, dtype=np.float32).reshape(8, 8)
+    cfg = AugmentConfig()
+    a = augment_image(image, cfg, seed=11)
+    b = augment_image(image, cfg, seed=11)
+    c = augment_image(image, cfg, seed=12)
+    assert a.shape == image.shape
+    assert a.min() >= 0.0 and a.max() <= 1.0
+    assert np.array_equal(a, b)
+    assert not np.array_equal(a, c)

@@ -124,3 +124,43 @@ def apply_temperature(logits: np.ndarray, temperature: float) -> np.ndarray:
         raise ValueError("temperature must be positive")
     logits = np.asarray(logits, dtype=np.float64).ravel()
     return special.expit(logits / float(temperature))
+
+
+def _nll(logits: np.ndarray, labels: np.ndarray, temperature: float) -> float:
+    probs = apply_temperature(logits, temperature)
+    probs = np.clip(probs, 1e-12, 1 - 1e-12)
+    return float(-np.mean(labels * np.log(probs) + (1 - labels) * np.log(1 - probs)))
+
+
+def fit_temperature(
+    logits: np.ndarray,
+    labels: np.ndarray,
+    *,
+    bounds: tuple[float, float] = (0.05, 10.0),
+) -> dict[str, float]:
+    """Fit a single temperature by minimising held-out NLL.
+
+    Temperature scaling has one parameter, so it cannot change the ranking of
+    predictions: AUC stays identical and only the probabilities move.  The
+    tests assert exactly that.
+    """
+    logits = np.asarray(logits, dtype=np.float64).ravel()
+    labels = np.asarray(labels, dtype=np.float64).ravel()
+    if logits.shape != labels.shape:
+        raise ValueError("logits and labels must match")
+    if logits.size == 0:
+        raise ValueError("empty input")
+    if bounds[0] <= 0 or bounds[1] <= bounds[0]:
+        raise ValueError("bounds must be positive and ordered")
+    result = optimize.minimize_scalar(
+        lambda t: _nll(logits, labels, float(t)),
+        bounds=bounds,
+        method="bounded",
+        options={"xatol": 1e-4},
+    )
+    temperature = float(result.x)
+    return {
+        "temperature": temperature,
+        "nll_before": _nll(logits, labels, 1.0),
+        "nll_after": float(result.fun),
+    }
