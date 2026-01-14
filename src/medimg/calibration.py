@@ -164,3 +164,40 @@ def fit_temperature(
         "nll_before": _nll(logits, labels, 1.0),
         "nll_after": float(result.fun),
     }
+
+
+def calibration_report(
+    probs: np.ndarray,
+    labels: np.ndarray,
+    n_bins: int = 10,
+) -> dict:
+    """Everything a reviewer wants on one screen."""
+    p, y = _check(probs, labels)
+    bins = reliability_curve(p, y, n_bins)
+    return {
+        "ece": expected_calibration_error(p, y, n_bins),
+        "mce": maximum_calibration_error(p, y, n_bins),
+        "brier": brier_score(p, y),
+        "n": int(len(p)),
+        "mean_confidence": float(p.mean()),
+        "base_rate": float(y.mean()),
+        "bins": [b.to_dict() for b in bins],
+    }
+
+
+def calibrate_probabilities(
+    logits: np.ndarray,
+    labels: np.ndarray,
+    n_bins: int = 10,
+) -> dict:
+    """Fit a temperature and report the ECE before and after."""
+    fit = fit_temperature(logits, labels)
+    before = apply_temperature(logits, 1.0)
+    after = apply_temperature(logits, fit["temperature"])
+    return {
+        "temperature": fit["temperature"],
+        "ece_before": expected_calibration_error(before, labels, n_bins),
+        "ece_after": expected_calibration_error(after, labels, n_bins),
+        "brier_before": brier_score(before, labels),
+        "brier_after": brier_score(after, labels),
+    }

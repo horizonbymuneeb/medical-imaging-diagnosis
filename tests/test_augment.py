@@ -123,3 +123,31 @@ def test_augment_image_is_bounded_and_seeded():
     assert a.min() >= 0.0 and a.max() <= 1.0
     assert np.array_equal(a, b)
     assert not np.array_equal(a, c)
+
+
+def test_augment_batch_handles_3d_and_4d():
+    batch3 = np.random.default_rng(8).random((4, 8, 8)).astype(np.float32)
+    out3 = augment_batch(batch3, AugmentConfig(), seed=1)
+    assert out3.shape == batch3.shape
+    batch4 = batch3[:, None, :, :]
+    out4 = augment_batch(batch4, AugmentConfig(), seed=1)
+    assert out4.shape == batch4.shape
+    with pytest.raises(ValueError):
+        augment_batch(np.zeros((8, 8)), AugmentConfig())
+
+
+def test_augment_patches_keeps_labels():
+    patches = [
+        Patch(np.random.default_rng(i).random((8, 8)).astype(np.float32), i % 2, (0, 0))
+        for i in range(6)
+    ]
+    out = augment_patches(patches, AugmentConfig(), seed=2)
+    assert [p.label for p in out] == [p.label for p in patches]
+    assert all(p.image.shape == (8, 8) for p in out)
+
+
+def test_augmentation_summary_probabilities():
+    summary = augmentation_summary(AugmentConfig(p_flip=0.5, p_rot90=0.5, p_gamma=0.0, p_noise=0.0, p_scale=0.0))
+    assert summary["p_unchanged"] == pytest.approx(0.25)
+    assert summary["p_modified"] == pytest.approx(0.75)
+    assert summary["expected_transforms"] == pytest.approx(1.0)
