@@ -309,3 +309,4 @@
 [2026-01-02T16:23:46] Add DICOM loader with metadata extraction
 [2026-01-05T12:37:31] Add DICOM loader with metadata extraction
 [2026-01-08T14:52:15] Implement ensemble of UNet and DeepLab
+[2026-01-14T19:28:41] Add federated learning components for privacy

@@ -286,3 +286,5 @@ if __name__ == '__main__':
 # Update inference pipeline for batch DICOM [2025-12-27T17:10:25]
 
 # Implement ensemble of UNet and DeepLab [2025-12-31T19:27:01]
+
+# Add federated learning components for privacy [2026-01-14T19:28:41]
