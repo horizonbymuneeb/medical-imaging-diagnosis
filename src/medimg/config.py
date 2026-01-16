@@ -11,3 +11,24 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 import yaml
+
+REQUIRED_SECTIONS = ("phantom", "windowing", "patching", "augment", "model", "train")
+
+# key -> (type, minimum, maximum)
+NUMERIC_BOUNDS: dict[str, tuple[type, float, float]] = {
+    "phantom.noise_sigma": (float, 0.0, 5000.0),
+    "phantom.lesion_radius_mm": (float, 0.5, 200.0),
+    "patching.patch_size": (int, 8, 256),
+    "patching.positive_fraction": (float, 0.0, 1.0),
+    "train.epochs": (int, 1, 10000),
+    "train.batch_size": (int, 1, 4096),
+    "train.lr": (float, 1e-8, 10.0),
+    "train.patience": (int, 0, 1000),
+    "train.val_fraction": (float, 0.01, 0.99),
+    "model.base_channels": (int, 1, 1024),
+    "model.dropout": (float, 0.0, 0.99),
+}
+
+
+class ConfigError(ValueError):
+    """Raised when ``config.yaml`` is missing keys or has out-of-range values."""
