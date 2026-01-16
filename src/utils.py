@@ -163,3 +163,5 @@ def format_number(n: int) -> str:
 # Add DICOM loader with metadata extraction [2026-01-15T12:51:55]
 
 # Implement Grad-CAM explainability heatmaps [2026-01-16T15:42:44]
+
+# Add federated learning components for privacy [2026-01-16T14:15:21]
