@@ -161,3 +161,5 @@ def format_number(n: int) -> str:
 # Implement ensemble of UNet and DeepLab [2026-01-08T14:52:15]
 
 # Add DICOM loader with metadata extraction [2026-01-15T12:51:55]
+
+# Implement Grad-CAM explainability heatmaps [2026-01-16T15:42:44]

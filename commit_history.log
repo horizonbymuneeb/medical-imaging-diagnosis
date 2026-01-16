@@ -311,3 +311,4 @@
 [2026-01-08T14:52:15] Implement ensemble of UNet and DeepLab
 [2026-01-14T19:28:41] Add federated learning components for privacy
 [2026-01-15T12:51:55] Add DICOM loader with metadata extraction
+[2026-01-16T15:42:44] Implement Grad-CAM explainability heatmaps
