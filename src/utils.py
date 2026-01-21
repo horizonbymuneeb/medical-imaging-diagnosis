@@ -165,3 +165,5 @@ def format_number(n: int) -> str:
 # Implement Grad-CAM explainability heatmaps [2026-01-16T15:42:44]
 
 # Add federated learning components for privacy [2026-01-16T14:15:21]
+
+# Fix pixel value normalization for CT scans [2026-01-21T11:14:07]
