@@ -32,3 +32,16 @@ NUMERIC_BOUNDS: dict[str, tuple[type, float, float]] = {
 
 class ConfigError(ValueError):
     """Raised when ``config.yaml`` is missing keys or has out-of-range values."""
+
+
+def load_config(path: str | Path) -> dict[str, Any]:
+    """Read and validate a YAML config file."""
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"no config at {path}")
+    with path.open("r", encoding="utf-8") as handle:
+        data = yaml.safe_load(handle) or {}
+    if not isinstance(data, dict):
+        raise ConfigError(f"{path} must contain a mapping at the top level")
+    validate_config(data)
+    return data
