@@ -45,3 +45,24 @@ def load_config(path: str | Path) -> dict[str, Any]:
         raise ConfigError(f"{path} must contain a mapping at the top level")
     validate_config(data)
     return data
+
+
+def deep_merge(base: Mapping[str, Any], override: Mapping[str, Any]) -> dict[str, Any]:
+    """Recursively merge ``override`` into a copy of ``base``."""
+    merged: dict[str, Any] = dict(base)
+    for key, value in override.items():
+        if key in merged and isinstance(merged[key], Mapping) and isinstance(value, Mapping):
+            merged[key] = deep_merge(merged[key], value)
+        else:
+            merged[key] = value
+    return merged
+
+
+def get_path(config: Mapping[str, Any], dotted: str, default: Any = None) -> Any:
+    """Read ``a.b.c`` from nested mappings, returning ``default`` if absent."""
+    node: Any = config
+    for part in dotted.split("."):
+        if not isinstance(node, Mapping) or part not in node:
+            return default
+        node = node[part]
+    return node
