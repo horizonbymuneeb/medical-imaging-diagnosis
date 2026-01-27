@@ -290,3 +290,5 @@ if __name__ == '__main__':
 # Add federated learning components for privacy [2026-01-14T19:28:41]
 
 # WIP: fixing data augmentation pipeline bug [2026-01-23T17:43:52]
+
+# Add DICOM loader with metadata extraction [2026-01-27T20:38:28]
