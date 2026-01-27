@@ -39,3 +39,25 @@ def test_reliability_curve_skips_empty_bins():
     bins = reliability_curve(probs, labels, n_bins=10)
     assert len(bins) == 1
     assert bins[0].count == 2
+
+
+def test_ece_zero_for_calibrated_predictions():
+    probs = np.full(100, 0.5)
+    labels = np.zeros(100)
+    labels[:50] = 1.0
+    assert expected_calibration_error(probs, labels, 10) == pytest.approx(0.0, abs=1e-9)
+
+
+def test_ece_positive_for_overconfident_predictions():
+    probs = np.full(100, 0.99)
+    labels = np.zeros(100)
+    labels[:50] = 1.0
+    ece = expected_calibration_error(probs, labels, 10)
+    assert ece == pytest.approx(0.49, abs=1e-6)
+    assert maximum_calibration_error(probs, labels, 10) == pytest.approx(0.49, abs=1e-6)
+
+
+def test_brier_score_exact():
+    probs = np.array([0.0, 1.0, 0.5])
+    labels = np.array([0.0, 1.0, 0.0])
+    assert brier_score(probs, labels) == pytest.approx((0.0 + 0.0 + 0.25) / 3)

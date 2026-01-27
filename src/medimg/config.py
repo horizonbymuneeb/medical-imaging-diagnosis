@@ -139,3 +139,12 @@ def resolve_paths(config: Mapping[str, Any], root: str | Path) -> dict[str, Any]
     if paths:
         resolved["paths"] = paths
     return resolved
+
+
+def config_fingerprint(config: Mapping[str, Any]) -> str:
+    """Stable short hash of a config, for logging which run produced a result."""
+    import hashlib
+    import json
+
+    payload = json.dumps(config, sort_keys=True, default=str).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()[:12]
