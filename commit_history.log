@@ -317,3 +317,4 @@
 [2026-01-23T17:43:52] WIP: fixing data augmentation pipeline bug
 [2026-01-27T09:18:08] Update documentation for clinical deployment
 [2026-01-27T20:38:28] Add DICOM loader with metadata extraction
+[2026-01-28T10:43:13] Add patient data de-identification checks
