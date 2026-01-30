@@ -95,3 +95,35 @@ def test_fit_temperature_validation():
         fit_temperature(np.array([]), np.array([]))
     with pytest.raises(ValueError):
         fit_temperature(np.array([0.0, 1.0]), np.array([0.0, 1.0]), bounds=(0.0, 2.0))
+
+
+def test_calibration_report_shape():
+    probs = np.array([0.1, 0.4, 0.6, 0.9])
+    labels = np.array([0, 0, 1, 1])
+    report = calibration_report(probs, labels, n_bins=4)
+    assert report["n"] == 4
+    assert report["base_rate"] == pytest.approx(0.5)
+    assert 0.0 <= report["ece"] <= 1.0
+    assert len(report["bins"]) == 4
+    assert set(report["bins"][0]) == {"lower", "upper", "count", "mean_confidence", "accuracy", "gap"}
+
+
+def test_calibrate_probabilities_returns_before_and_after():
+    rng = np.random.default_rng(1)
+    labels = (rng.random(120) < 0.5).astype(np.float64)
+    logits = rng.normal(0.0, 2.0, size=120)
+    out = calibrate_probabilities(logits, labels)
+    assert out["temperature"] > 0
+    assert out["ece_before"] >= 0 and out["ece_after"] >= 0
+    assert out["brier_after"] <= out["brier_before"] + 0.05
+
+
+def test_calibration_input_validation():
+    with pytest.raises(ValueError):
+        expected_calibration_error(np.array([1.5]), np.array([1]))
+    with pytest.raises(ValueError):
+        expected_calibration_error(np.array([0.5, 0.5]), np.array([1]))
+    with pytest.raises(ValueError):
+        reliability_curve(np.array([0.5]), np.array([2]), n_bins=4)
+    with pytest.raises(ValueError):
+        reliability_curve(np.array([0.5]), np.array([1]), n_bins=0)

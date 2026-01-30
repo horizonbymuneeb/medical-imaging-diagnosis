@@ -36,3 +36,52 @@ class SyntheticSpec:
             raise ValueError("positive_fraction must be in [0, 1]")
         if self.axis not in (0, 1, 2):
             raise ValueError("axis must be 0, 1 or 2")
+
+
+def build_specs(
+    n: int,
+    *,
+    seed: int = 0,
+    positive_fraction: float = 0.5,
+) -> list[SyntheticSpec]:
+    """Create ``n`` specs whose seeds are derived from ``seed`` deterministically."""
+    if n <= 0:
+        raise ValueError("n must be positive")
+    rng = np.random.default_rng(seed)
+    seeds = rng.integers(0, 2**31 - 1, size=n)
+    return [
+        SyntheticSpec(index=i, seed=int(s), positive_fraction=positive_fraction)
+        for i, s in enumerate(seeds)
+    ]
+
+
+def slice_for_spec(
+    spec: SyntheticSpec,
+    cfg: PhantomConfig,
+    *,
+    window: str = "brain",
+    normalize: str = "minmax",
+) -> tuple[np.ndarray, np.ndarray]:
+    """Windowed lesion slice and its mask for one spec.
+
+    The slice is taken through the lesion centre, so every generated image has
+    a visible lesion; the negative class comes from the sampler, not from
+    lesion-free slices.
+    """
+    phantom_cfg = PhantomConfig(
+        shape=cfg.shape,
+        spacing=cfg.spacing,
+        lesion_radius_mm=cfg.lesion_radius_mm,
+        noise_sigma=cfg.noise_sigma,
+        seed=spec.seed,
+        head_radius_fraction=cfg.head_radius_fraction,
+        lesion_intensity=cfg.lesion_intensity,
+        noise_model=cfg.noise_model,
+    )
+    data, lesion_mask = brain_phantom(phantom_cfg)
+    index = lesion_slice_index(lesion_mask, axis=spec.axis)
+    image = np.take(data, index, axis=spec.axis)
+    mask = np.take(lesion_mask, index, axis=spec.axis)
+    windowed = apply_preset(image, window)
+    normalised = normalize_array(windowed, normalize)
+    return normalised.astype(np.float32), mask.astype(bool)
