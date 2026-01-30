@@ -294,3 +294,5 @@ if __name__ == '__main__':
 # Add DICOM loader with metadata extraction [2026-01-27T20:38:28]
 
 # Add patient data de-identification checks [2026-01-28T10:43:13]
+
+# Fix handling of multi-slice CT scans [2026-01-30T13:09:49]
