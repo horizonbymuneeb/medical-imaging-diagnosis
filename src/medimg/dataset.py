@@ -85,3 +85,102 @@ def slice_for_spec(
     windowed = apply_preset(image, window)
     normalised = normalize_array(windowed, normalize)
     return normalised.astype(np.float32), mask.astype(bool)
+
+
+class SyntheticPatchDataset(Dataset):
+    """Patch dataset over a list of specs.
+
+    Slices are cached per seed because regenerating a 64x64x48 phantom for
+    every patch would dominate training time.  Augmentation happens after the
+    cache lookup so each epoch still sees different pixels.
+    """
+
+    def __init__(
+        self,
+        specs: Sequence[SyntheticSpec],
+        *,
+        patch_size: int = 32,
+        patches_per_spec: int = 1,
+        cfg: PhantomConfig | None = None,
+        window: str = "brain",
+        normalize: str = "minmax",
+        augment: AugmentConfig | None = DEFAULT_AUGMENT,
+        seed: int = 0,
+    ) -> None:
+        if not specs:
+            raise ValueError("specs must not be empty")
+        if patches_per_spec <= 0:
+            raise ValueError("patches_per_spec must be positive")
+        self.specs = list(specs)
+        self.patch_size = int(patch_size)
+        self.patches_per_spec = int(patches_per_spec)
+        self.cfg = cfg or PhantomConfig()
+        self.window = window
+        self.normalize = normalize
+        self.augment = augment
+        self.seed = int(seed)
+        self._cache: dict[int, tuple[np.ndarray, np.ndarray]] = {}
+        self._items = self._build_index()
+
+    def _build_index(self) -> list[tuple[SyntheticSpec, int]]:
+        rng = np.random.default_rng(self.seed)
+        items: list[tuple[SyntheticSpec, int]] = []
+        for spec in self.specs:
+            for _ in range(self.patches_per_spec):
+                items.append((spec, int(rng.integers(0, 2**31 - 1))))
+        return items
+
+    def _slice(self, spec: SyntheticSpec) -> tuple[np.ndarray, np.ndarray]:
+        if spec.seed not in self._cache:
+            self._cache[spec.seed] = slice_for_spec(
+                spec, self.cfg, window=self.window, normalize=self.normalize
+            )
+        return self._cache[spec.seed]
+
+    def __len__(self) -> int:
+        return len(self._items)
+
+    def __getitem__(self, index: int) -> dict[str, torch.Tensor]:
+        spec, item_seed = self._items[index]
+        image, mask = self._slice(spec)
+        sampler = PatchSampler(
+            image,
+            mask,
+            self.patch_size,
+            seed=item_seed,
+            positive_fraction=spec.positive_fraction,
+        )
+        patch = sampler.sample(1)[0]
+        if self.augment is not None:
+            augmented = augment_image(patch.image, self.augment, seed=item_seed)
+            patch = Patch(augmented, patch.label, patch.center, patch.source_index)
+        return {
+            "image": torch.from_numpy(patch.image[None, :, :].copy()),
+            "label": torch.tensor(float(patch.label), dtype=torch.float32),
+        }
+
+    def labels(self) -> np.ndarray:
+        """Materialise every label (cheap: no pixels are decoded for this)."""
+        labels = []
+        for spec, item_seed in self._items:
+            image, mask = self._slice(spec)
+            sampler = PatchSampler(
+                image,
+                mask,
+                self.patch_size,
+                seed=item_seed,
+                positive_fraction=spec.positive_fraction,
+            )
+            patch = sampler.sample(1)[0]
+            labels.append(patch.label)
+        return np.asarray(labels, dtype=np.int64)
+
+
+def collate_patches(batch: Iterable[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]:
+    """Stack dataset items into batched tensors."""
+    items = list(batch)
+    if not items:
+        raise ValueError("cannot collate an empty batch")
+    images = torch.stack([item["image"] for item in items], dim=0)
+    labels = torch.stack([item["label"] for item in items], dim=0)
+    return {"image": images, "label": labels}
