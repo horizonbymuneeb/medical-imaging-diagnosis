@@ -169,3 +169,5 @@ def format_number(n: int) -> str:
 # Fix pixel value normalization for CT scans [2026-01-21T11:14:07]
 
 # Update documentation for clinical deployment [2026-01-27T09:18:08]
+
+# Implement UNet for lesion segmentation task [2026-02-04T19:24:57]
