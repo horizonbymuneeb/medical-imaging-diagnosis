@@ -296,3 +296,5 @@ if __name__ == '__main__':
 # Add patient data de-identification checks [2026-01-28T10:43:13]
 
 # Fix handling of multi-slice CT scans [2026-01-30T13:09:49]
+
+# Update CI pipeline for medical compliance [2026-02-05T14:08:20]
