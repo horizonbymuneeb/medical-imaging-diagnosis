@@ -184,3 +184,52 @@ def collate_patches(batch: Iterable[dict[str, torch.Tensor]]) -> dict[str, torch
     images = torch.stack([item["image"] for item in items], dim=0)
     labels = torch.stack([item["label"] for item in items], dim=0)
     return {"image": images, "label": labels}
+
+
+def make_dataloaders(
+    specs: Sequence[SyntheticSpec],
+    *,
+    batch_size: int = 16,
+    val_fraction: float = 0.25,
+    patch_size: int = 32,
+    cfg: PhantomConfig | None = None,
+    augment: AugmentConfig | None = DEFAULT_AUGMENT,
+    seed: int = 0,
+) -> tuple[DataLoader, DataLoader]:
+    """Split specs into train/validation loaders."""
+    if batch_size <= 0:
+        raise ValueError("batch_size must be positive")
+    if not 0.0 < val_fraction < 1.0:
+        raise ValueError("val_fraction must be in (0, 1)")
+    rng = np.random.default_rng(seed)
+    order = rng.permutation(len(specs))
+    n_val = max(1, int(round(len(specs) * val_fraction)))
+    val_specs = [specs[int(i)] for i in order[:n_val]]
+    train_specs = [specs[int(i)] for i in order[n_val:]]
+    if not train_specs:
+        raise ValueError("validation split consumed every spec; add more specs")
+    train_ds = SyntheticPatchDataset(
+        train_specs, patch_size=patch_size, cfg=cfg, augment=augment, seed=seed
+    )
+    val_ds = SyntheticPatchDataset(
+        val_specs, patch_size=patch_size, cfg=cfg, augment=None, seed=seed + 1
+    )
+    train_loader = DataLoader(
+        train_ds, batch_size=batch_size, shuffle=True, collate_fn=collate_patches
+    )
+    val_loader = DataLoader(
+        val_ds, batch_size=batch_size, shuffle=False, collate_fn=collate_patches
+    )
+    return train_loader, val_loader
+
+
+def dataset_statistics(dataset: SyntheticPatchDataset) -> dict[str, float]:
+    """Class balance of a dataset, computed without loading full batches."""
+    labels = dataset.labels()
+    positives = int(labels.sum())
+    return {
+        "items": float(len(labels)),
+        "positives": float(positives),
+        "negatives": float(len(labels) - positives),
+        "positive_rate": float(positives / max(1, len(labels))),
+    }
