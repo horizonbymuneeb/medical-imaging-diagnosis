@@ -233,3 +233,26 @@ def dataset_statistics(dataset: SyntheticPatchDataset) -> dict[str, float]:
         "negatives": float(len(labels) - positives),
         "positive_rate": float(positives / max(1, len(labels))),
     }
+
+
+def arrays_from_dataset(
+    dataset: SyntheticPatchDataset,
+    limit: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Materialise a dataset into NumPy arrays (used by tests and the demo)."""
+    n = len(dataset) if limit is None else min(int(limit), len(dataset))
+    images = []
+    labels = []
+    for i in range(n):
+        item = dataset[i]
+        images.append(item["image"].numpy())
+        labels.append(float(item["label"]))
+    return np.stack(images, axis=0), np.asarray(labels, dtype=np.float32)
+
+
+def patch_label_counts(patches: Iterable[Patch]) -> dict[int, int]:
+    """Count labels in an explicit patch list."""
+    counts = {0: 0, 1: 0}
+    for patch in patches:
+        counts[patch.label] += 1
+    return counts
