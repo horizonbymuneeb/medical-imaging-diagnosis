@@ -300,3 +300,5 @@ if __name__ == '__main__':
 # Update CI pipeline for medical compliance [2026-02-05T14:08:20]
 
 # Fix pixel value normalization for CT scans [2026-02-09T19:32:00]
+
+# Fix handling of multi-slice CT scans [2026-02-12T13:56:23]
