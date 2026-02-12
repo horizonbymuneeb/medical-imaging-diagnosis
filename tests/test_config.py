@@ -13,3 +13,5 @@ from src.medimg.config import (
     resolve_paths,
     validate_config,
 )
+
+REPO_ROOT = Path(__file__).resolve().parents[1]

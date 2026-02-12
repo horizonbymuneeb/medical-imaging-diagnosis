@@ -33,3 +33,23 @@ def phantom_section(config: dict) -> PhantomConfig:
         noise_sigma=float(section.get("noise_sigma", 18.0)),
         seed=int(section.get("seed", 7)),
     )
+
+
+def describe_phantom(config: dict) -> dict:
+    """Geometry and intensity summary of the configured phantom."""
+    cfg = phantom_section(config)
+    return phantom_summary(cfg)
+
+
+def describe_window(config: dict) -> dict:
+    """Window statistics for the configured preset on the lesion slice."""
+    cfg = phantom_section(config)
+    preset_name = config.get("windowing", {}).get("preset", "brain")
+    volume, mask = make_phantom_pair(cfg)
+    from src.medimg.phantom import lesion_slice_index
+
+    index = lesion_slice_index(mask, axis=2)
+    image = volume.data[:, :, index]
+    preset = WINDOW_PRESETS[preset_name]
+    stats = window_statistics(image, preset.level, preset.width)
+    return {"preset": preset_name, "slice": index, **stats}
