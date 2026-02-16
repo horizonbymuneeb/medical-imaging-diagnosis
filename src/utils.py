@@ -173,3 +173,5 @@ def format_number(n: int) -> str:
 # Implement UNet for lesion segmentation task [2026-02-04T19:24:57]
 
 # Update CI pipeline for medical compliance [2026-02-06T17:37:11]
+
+# WIP: fixing data augmentation pipeline bug [2026-02-16T18:52:34]

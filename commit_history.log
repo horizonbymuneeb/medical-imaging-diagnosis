@@ -324,3 +324,4 @@
 [2026-02-06T17:37:11] Update CI pipeline for medical compliance
 [2026-02-09T19:32:00] Fix pixel value normalization for CT scans
 [2026-02-12T13:56:23] Fix handling of multi-slice CT scans
+[2026-02-16T18:52:34] WIP: fixing data augmentation pipeline bug
