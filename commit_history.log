@@ -326,3 +326,4 @@
 [2026-02-12T13:56:23] Fix handling of multi-slice CT scans
 [2026-02-16T18:52:34] WIP: fixing data augmentation pipeline bug
 [2026-02-17T11:15:20] WIP: fixing data augmentation pipeline bug
+[2026-02-18T13:30:42] Update ResNet classifier for 3D volumes

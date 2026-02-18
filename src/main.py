@@ -304,3 +304,5 @@ if __name__ == '__main__':
 # Fix handling of multi-slice CT scans [2026-02-12T13:56:23]
 
 # WIP: fixing data augmentation pipeline bug [2026-02-17T11:15:20]
+
+# Update ResNet classifier for 3D volumes [2026-02-18T13:30:42]
