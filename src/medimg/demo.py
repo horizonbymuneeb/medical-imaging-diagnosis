@@ -89,3 +89,28 @@ def describe_metrics() -> dict:
         "confusion": confusion_matrix(labels, pred).tolist(),
         "calibration": calibration_report(scores, labels, n_bins=4),
     }
+
+
+def run_demo(config: dict) -> dict:
+    """Assemble every section into one report."""
+    return {
+        "phantom": describe_phantom(config),
+        "window": describe_window(config),
+        "patches": describe_patches(config),
+        "metrics": describe_metrics(),
+    }
+
+
+def main(argv: Iterable[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Run the phantom pipeline demo")
+    parser.add_argument("--config", default="config.yaml")
+    parser.add_argument("--out", default=None, help="optional JSON output path")
+    args = parser.parse_args(list(argv) if argv is not None else None)
+    report = run_demo(load_config(args.config))
+    text = json.dumps(report, indent=2)
+    print(text)
+    if args.out:
+        path = Path(args.out)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
+    return 0
