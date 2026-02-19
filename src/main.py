@@ -306,3 +306,5 @@ if __name__ == '__main__':
 # WIP: fixing data augmentation pipeline bug [2026-02-17T11:15:20]
 
 # Update ResNet classifier for 3D volumes [2026-02-18T13:30:42]
+
+# Add MONAI transforms for medical images [2026-02-19T10:03:48]
