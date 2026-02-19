@@ -52,3 +52,37 @@ def test_repo_config_yaml_is_valid():
 def test_load_config_missing_file():
     with pytest.raises(FileNotFoundError):
         load_config(REPO_ROOT / "no-such-config.yaml")
+
+
+def test_validate_config_lists_all_problems():
+    with pytest.raises(ConfigError) as excinfo:
+        validate_config({})
+    message = str(excinfo.value)
+    for section in ("phantom", "windowing", "patching", "train"):
+        assert section in message
+
+
+def test_validate_config_rejects_bad_values():
+    config = valid_config()
+    config["train"]["epochs"] = 0
+    config["patching"]["positive_fraction"] = 2.0
+    config["windowing"]["preset"] = "chest"
+    with pytest.raises(ConfigError) as excinfo:
+        validate_config(config)
+    message = str(excinfo.value)
+    assert "train.epochs" in message
+    assert "patching.positive_fraction" in message
+    assert "windowing.preset" in message
+
+
+def test_validate_config_rejects_non_numeric_and_bad_shape():
+    config = valid_config()
+    config["train"]["lr"] = "fast"
+    config["phantom"]["shape"] = [32, 32]
+    config["phantom"]["spacing"] = [1.0, -1.0, 1.0]
+    with pytest.raises(ConfigError) as excinfo:
+        validate_config(config)
+    message = str(excinfo.value)
+    assert "train.lr" in message
+    assert "phantom.shape" in message
+    assert "phantom.spacing" in message

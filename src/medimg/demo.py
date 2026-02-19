@@ -114,3 +114,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
     return 0
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
