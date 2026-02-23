@@ -86,3 +86,22 @@ def test_validate_config_rejects_non_numeric_and_bad_shape():
     assert "train.lr" in message
     assert "phantom.shape" in message
     assert "phantom.spacing" in message
+
+
+def test_valid_config_passes():
+    validate_config(valid_config())
+
+
+def test_deep_merge_is_recursive_and_non_mutating():
+    base = {"a": {"x": 1, "y": 2}, "b": 3}
+    override = {"a": {"y": 20, "z": 30}, "c": 4}
+    merged = deep_merge(base, override)
+    assert merged == {"a": {"x": 1, "y": 20, "z": 30}, "b": 3, "c": 4}
+    assert base == {"a": {"x": 1, "y": 2}, "b": 3}
+
+
+def test_get_path_dotted_lookup():
+    config = {"a": {"b": {"c": 7}}}
+    assert get_path(config, "a.b.c") == 7
+    assert get_path(config, "a.b.missing", default=0) == 0
+    assert get_path(config, "x.y.z") is None
