@@ -105,3 +105,28 @@ def test_get_path_dotted_lookup():
     assert get_path(config, "a.b.c") == 7
     assert get_path(config, "a.b.missing", default=0) == 0
     assert get_path(config, "x.y.z") is None
+
+
+def test_resolve_paths_makes_absolute():
+    config = {"paths": {"data": "data/volumes", "abs": "/tmp/x"}}
+    resolved = resolve_paths(config, REPO_ROOT)
+    assert Path(resolved["paths"]["data"]).is_absolute()
+    assert resolved["paths"]["abs"] == "/tmp/x"
+    assert "paths" not in resolve_paths({"a": 1}, REPO_ROOT)
+
+
+def test_config_fingerprint_is_stable_and_order_independent():
+    a = {"x": 1, "y": {"z": 2}}
+    b = {"y": {"z": 2}, "x": 1}
+    assert config_fingerprint(a) == config_fingerprint(b)
+    assert config_fingerprint(a) != config_fingerprint({"x": 2, "y": {"z": 2}})
+    assert len(config_fingerprint(a)) == 12
+
+
+def test_package_imports_and_exports():
+    import src
+    import src.medimg as pkg
+
+    assert src.__version__
+    assert "apply_window" in pkg.__all__
+    assert callable(pkg.auc_score)
