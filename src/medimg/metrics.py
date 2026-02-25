@@ -60,3 +60,65 @@ def auc_score(y_true: np.ndarray, y_score: np.ndarray) -> float:
     fpr, tpr, _ = roc_points(y_true, y_score)
     # np.trapz wants increasing x; fpr is non-decreasing already.
     return float(np.trapezoid(tpr, fpr)) if hasattr(np, "trapezoid") else float(np.trapz(tpr, fpr))
+
+
+def specificity_at_sensitivity(
+    y_true: np.ndarray,
+    y_score: np.ndarray,
+    target_sensitivity: float,
+) -> float:
+    """Highest specificity reachable at or above a sensitivity target."""
+    if not 0.0 < target_sensitivity <= 1.0:
+        raise ValueError("target_sensitivity must be in (0, 1]")
+    fpr, tpr, _ = roc_points(y_true, y_score)
+    valid = tpr >= target_sensitivity - 1e-12
+    if not valid.any():
+        return 0.0
+    return float(1.0 - fpr[valid].min())
+
+
+def sensitivity_at_specificity(
+    y_true: np.ndarray,
+    y_score: np.ndarray,
+    target_specificity: float,
+) -> float:
+    """Highest sensitivity reachable at or above a specificity target.
+
+    Interpolates linearly between adjacent ROC points instead of snapping to a
+    threshold, because with a small validation set the nearest threshold can be
+    several specificity points away from the requested one.
+    """
+    if not 0.0 < target_specificity < 1.0:
+        raise ValueError("target_specificity must be in (0, 1)")
+    fpr, tpr, _ = roc_points(y_true, y_score)
+    spec = 1.0 - fpr
+    target_fpr = 1.0 - target_specificity
+    if target_fpr <= fpr[0]:
+        return float(tpr[0])
+    for i in range(1, len(fpr)):
+        if fpr[i] >= target_fpr:
+            if fpr[i] == fpr[i - 1]:
+                return float(tpr[i])
+            w = (target_fpr - fpr[i - 1]) / (fpr[i] - fpr[i - 1])
+            return float(tpr[i - 1] + w * (tpr[i] - tpr[i - 1]))
+    return float(tpr[-1])
+
+
+def confusion_matrix(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    labels: Sequence[int] = (0, 1),
+) -> np.ndarray:
+    """Confusion matrix with ``rows = true`` and ``cols = predicted``."""
+    y = np.asarray(y_true).astype(np.int64).ravel()
+    p = np.asarray(y_pred).astype(np.int64).ravel()
+    if y.shape != p.shape:
+        raise ValueError("y_true and y_pred must match")
+    labels = tuple(int(l) for l in labels)
+    if not set(np.unique(y)) <= set(labels) or not set(np.unique(p)) <= set(labels):
+        raise ValueError(f"values outside labels {labels}")
+    index = {label: i for i, label in enumerate(labels)}
+    matrix = np.zeros((len(labels), len(labels)), dtype=np.int64)
+    for t, q in zip(y, p):
+        matrix[index[int(t)], index[int(q)]] += 1
+    return matrix
