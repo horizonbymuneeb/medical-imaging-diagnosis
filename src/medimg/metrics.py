@@ -122,3 +122,46 @@ def confusion_matrix(
     for t, q in zip(y, p):
         matrix[index[int(t)], index[int(q)]] += 1
     return matrix
+
+
+def per_class_metrics(
+    matrix: np.ndarray,
+    labels: Sequence[int] = (0, 1),
+    *,
+    eps: float = 1e-12,
+) -> dict[int, dict[str, float]]:
+    """Precision, recall, F1 and support from a confusion matrix."""
+    matrix = np.asarray(matrix)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("matrix must be square")
+    if matrix.shape[0] != len(labels):
+        raise ValueError("labels must match the matrix size")
+    out: dict[int, dict[str, float]] = {}
+    total = float(matrix.sum())
+    for i, label in enumerate(labels):
+        tp = float(matrix[i, i])
+        fn = float(matrix[i, :].sum() - tp)
+        fp = float(matrix[:, i].sum() - tp)
+        precision = tp / (tp + fp + eps)
+        recall = tp / (tp + fn + eps)
+        f1 = 2 * precision * recall / (precision + recall + eps)
+        out[int(label)] = {
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+            "support": float(matrix[i, :].sum()),
+            "prevalence": float(matrix[i, :].sum() / total) if total else 0.0,
+        }
+    return out
+
+
+def precision_recall_f1(y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, float]:
+    """Binary precision/recall/F1 for the positive class."""
+    matrix = confusion_matrix(y_true, y_pred, labels=(0, 1))
+    metrics = per_class_metrics(matrix, labels=(0, 1))[1]
+    return {
+        "precision": metrics["precision"],
+        "recall": metrics["recall"],
+        "f1": metrics["f1"],
+        "support": metrics["support"],
+    }
