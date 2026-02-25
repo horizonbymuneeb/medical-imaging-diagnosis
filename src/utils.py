@@ -177,3 +177,5 @@ def format_number(n: int) -> str:
 # WIP: fixing data augmentation pipeline bug [2026-02-16T18:52:34]
 
 # WIP: benchmarking on NIH Chest X-ray dataset [2026-02-23T20:02:43]
+
+# Add test-time augmentation for robust predictions [2026-02-25T18:17:53]
