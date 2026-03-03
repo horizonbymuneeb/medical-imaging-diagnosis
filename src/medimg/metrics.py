@@ -175,3 +175,63 @@ def accuracy_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     if y.size == 0:
         raise ValueError("empty input")
     return float((y == p).mean())
+
+
+def threshold_sweep(
+    y_true: np.ndarray,
+    y_score: np.ndarray,
+    thresholds: Iterable[float] | None = None,
+) -> list[dict[str, float]]:
+    """Metrics at each threshold; defaults to 0.05 .. 0.95 in steps of 0.05."""
+    y, s = _check_pair(y_true, y_score)
+    if thresholds is None:
+        thresholds = np.arange(0.05, 1.0, 0.05)
+    rows = []
+    for threshold in thresholds:
+        pred = (s >= float(threshold)).astype(np.int64)
+        row = precision_recall_f1(y, pred)
+        rows.append(
+            {
+                "threshold": float(threshold),
+                "precision": row["precision"],
+                "recall": row["recall"],
+                "f1": row["f1"],
+                "accuracy": accuracy_score(y, pred),
+            }
+        )
+    return rows
+
+
+def best_threshold(
+    y_true: np.ndarray,
+    y_score: np.ndarray,
+    criterion: str = "youden",
+) -> float:
+    """Pick a threshold that maximises Youden's J or F1."""
+    if criterion not in {"youden", "f1"}:
+        raise ValueError("criterion must be 'youden' or 'f1'")
+    y, s = _check_pair(y_true, y_score)
+    fpr, tpr, thresholds = roc_points(y, s)
+    if criterion == "youden":
+        scores = tpr - fpr
+    else:
+        positives = y.sum()
+        precision = tpr * positives / np.maximum((tpr * positives) + (fpr * (len(y) - positives)), 1e-12)
+        scores = 2 * precision * tpr / np.maximum(precision + tpr, 1e-12)
+    best = int(np.argmax(scores))
+    return float(thresholds[best])
+
+
+def classification_report_dict(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    labels: Sequence[int] = (0, 1),
+) -> dict:
+    """A JSON-friendly classification report."""
+    matrix = confusion_matrix(y_true, y_pred, labels)
+    return {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "confusion_matrix": matrix.tolist(),
+        "per_class": {str(k): v for k, v in per_class_metrics(matrix, labels).items()},
+        "support": float(matrix.sum()),
+    }
