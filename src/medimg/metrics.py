@@ -165,3 +165,13 @@ def precision_recall_f1(y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, flo
         "f1": metrics["f1"],
         "support": metrics["support"],
     }
+
+
+def accuracy_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    y = np.asarray(y_true).ravel()
+    p = np.asarray(y_pred).ravel()
+    if y.shape != p.shape:
+        raise ValueError("y_true and y_pred must match")
+    if y.size == 0:
+        raise ValueError("empty input")
+    return float((y == p).mean())
