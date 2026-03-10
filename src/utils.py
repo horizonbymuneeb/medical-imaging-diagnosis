@@ -183,3 +183,5 @@ def format_number(n: int) -> str:
 # Implement 3D volume processing pipeline [2026-03-03T11:08:30]
 
 # Update documentation for clinical deployment [2026-03-09T16:18:24]
+
+# Update inference pipeline for batch DICOM [2026-03-10T16:49:28]
