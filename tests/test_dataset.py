@@ -41,3 +41,44 @@ def test_build_specs_is_deterministic():
     assert [s.index for s in a] == list(range(5))
     with pytest.raises(ValueError):
         build_specs(0)
+
+
+def test_slice_for_spec_is_windowed_and_contains_lesion():
+    image, mask = slice_for_spec(SyntheticSpec(0, seed=3), small_cfg())
+    assert image.shape == (32, 32)
+    assert image.dtype == np.float32
+    assert 0.0 <= float(image.min()) and float(image.max()) <= 1.0
+    assert mask.dtype == np.bool_
+    assert mask.sum() > 0
+
+
+def test_dataset_lengths_and_item_shapes():
+    specs = build_specs(4, seed=7)
+    ds = SyntheticPatchDataset(
+        specs,
+        patch_size=16,
+        patches_per_spec=2,
+        cfg=small_cfg(),
+        augment=None,
+        seed=0,
+    )
+    assert len(ds) == 8
+    item = ds[0]
+    assert item["image"].shape == (1, 16, 16)
+    assert item["image"].dtype == torch.float32
+    assert item["label"].shape == ()
+    assert float(item["label"]) in (0.0, 1.0)
+    with pytest.raises(ValueError):
+        SyntheticPatchDataset([], patch_size=16)
+    with pytest.raises(ValueError):
+        SyntheticPatchDataset(specs, patch_size=16, patches_per_spec=0)
+
+
+def test_dataset_is_deterministic_with_fixed_seed():
+    specs = build_specs(3, seed=11)
+    kwargs = dict(patch_size=16, cfg=small_cfg(), augment=None, seed=5)
+    a = SyntheticPatchDataset(specs, **kwargs)
+    b = SyntheticPatchDataset(specs, **kwargs)
+    for i in range(len(a)):
+        assert torch.equal(a[i]["image"], b[i]["image"])
+        assert float(a[i]["label"]) == float(b[i]["label"])
