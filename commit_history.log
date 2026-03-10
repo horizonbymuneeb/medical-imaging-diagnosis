@@ -335,3 +335,4 @@
 [2026-03-03T13:53:36] WIP: tuning loss for imbalanced tumor labels
 [2026-03-03T11:08:30] Implement 3D volume processing pipeline
 [2026-03-09T16:18:24] Update documentation for clinical deployment
+[2026-03-10T20:30:19] Update inference pipeline for batch DICOM
