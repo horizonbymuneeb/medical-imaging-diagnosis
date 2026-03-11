@@ -48,3 +48,67 @@ class ConvBlock(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.pool(self.act(self.norm(self.conv(x))))
+
+
+class SmallCNN(nn.Module):
+    """Three-block CNN with global average pooling and a single logit.
+
+    Global average pooling instead of a flatten head keeps the parameter count
+    independent of the patch size, so the same model works for 32 or 64 px
+    patches without editing the head.
+    """
+
+    def __init__(self, cfg: ModelConfig | None = None) -> None:
+        super().__init__()
+        self.cfg = cfg or ModelConfig()
+        c = self.cfg.base_channels
+        self.features = nn.Sequential(
+            ConvBlock(self.cfg.in_channels, c),
+            ConvBlock(c, c * 2),
+            ConvBlock(c * 2, c * 4),
+        )
+        self.head = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Flatten(),
+            nn.Dropout(self.cfg.dropout),
+            nn.Linear(c * 4, 1),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Return logits with shape ``(N,)``."""
+        if x.ndim != 4:
+            raise ValueError(f"expected (N, C, H, W) input, got shape {tuple(x.shape)}")
+        return self.head(self.features(x)).squeeze(-1)
+
+    def features_for(self, x: torch.Tensor) -> torch.Tensor:
+        """Penultimate feature map, useful for debugging representations."""
+        return self.features(x)
+
+
+def make_model(
+    *,
+    in_channels: int = 1,
+    base_channels: int = 16,
+    dropout: float = 0.1,
+    patch_size: int = 32,
+    seed: int | None = None,
+) -> SmallCNN:
+    """Build a model, optionally with a deterministic weight initialisation."""
+    cfg = ModelConfig(
+        in_channels=in_channels,
+        base_channels=base_channels,
+        dropout=dropout,
+        patch_size=patch_size,
+    )
+    model = SmallCNN(cfg)
+    if seed is not None:
+        torch.manual_seed(seed)
+        for module in model.modules():
+            if isinstance(module, (nn.Conv2d, nn.Linear)):
+                nn.init.kaiming_normal_(module.weight, nonlinearity="relu")
+                if module.bias is not None:
+                    nn.init.zeros_(module.bias)
+            elif isinstance(module, nn.BatchNorm2d):
+                nn.init.ones_(module.weight)
+                nn.init.zeros_(module.bias)
+    return model

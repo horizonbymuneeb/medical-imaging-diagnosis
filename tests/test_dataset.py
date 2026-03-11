@@ -82,3 +82,43 @@ def test_dataset_is_deterministic_with_fixed_seed():
     for i in range(len(a)):
         assert torch.equal(a[i]["image"], b[i]["image"])
         assert float(a[i]["label"]) == float(b[i]["label"])
+
+
+def test_collate_builds_batch_tensors():
+    specs = build_specs(4, seed=1)
+    ds = SyntheticPatchDataset(specs, patch_size=16, cfg=small_cfg(), augment=None)
+    batch = collate_patches([ds[i] for i in range(4)])
+    assert batch["image"].shape == (4, 1, 16, 16)
+    assert batch["label"].shape == (4,)
+    with pytest.raises(ValueError):
+        collate_patches([])
+
+
+def test_make_dataloaders_split_sizes():
+    specs = build_specs(12, seed=3)
+    train, val = make_dataloaders(
+        specs,
+        batch_size=4,
+        val_fraction=0.25,
+        patch_size=16,
+        cfg=small_cfg(),
+        augment=None,
+        seed=1,
+    )
+    assert len(train.dataset) == 9
+    assert len(val.dataset) == 3
+    batch = next(iter(train))
+    assert batch["image"].shape[0] <= 4
+    with pytest.raises(ValueError):
+        make_dataloaders(specs, batch_size=0)
+    with pytest.raises(ValueError):
+        make_dataloaders(specs, val_fraction=1.0)
+
+
+def test_dataset_statistics_reports_rate():
+    specs = build_specs(6, seed=4)
+    ds = SyntheticPatchDataset(specs, patch_size=16, cfg=small_cfg(), augment=None, seed=2)
+    stats = dataset_statistics(ds)
+    assert stats["items"] == 6
+    assert stats["positives"] + stats["negatives"] == 6
+    assert 0.0 <= stats["positive_rate"] <= 1.0
