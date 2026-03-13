@@ -112,3 +112,36 @@ def make_model(
                 nn.init.ones_(module.weight)
                 nn.init.zeros_(module.bias)
     return model
+
+
+def count_parameters(model: nn.Module, *, trainable_only: bool = True) -> int:
+    """Number of parameters, trainable by default."""
+    if trainable_only:
+        return sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return sum(p.numel() for p in model.parameters())
+
+
+def save_checkpoint(model: nn.Module, path: str | Path, meta: dict | None = None) -> Path:
+    """Save weights plus the metadata needed to rebuild the model."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save({"state_dict": model.state_dict(), "meta": meta or {}}, path)
+    return path
+
+
+def load_checkpoint(path: str | Path) -> tuple[SmallCNN, dict]:
+    """Rebuild a model from a checkpoint written by :func:`save_checkpoint`."""
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"no checkpoint at {path}")
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    meta = payload.get("meta", {})
+    model = make_model(
+        in_channels=int(meta.get("in_channels", 1)),
+        base_channels=int(meta.get("base_channels", 16)),
+        dropout=float(meta.get("dropout", 0.1)),
+        patch_size=int(meta.get("patch_size", 32)),
+    )
+    model.load_state_dict(payload["state_dict"])
+    model.eval()
+    return model, meta
