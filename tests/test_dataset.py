@@ -122,3 +122,38 @@ def test_dataset_statistics_reports_rate():
     assert stats["items"] == 6
     assert stats["positives"] + stats["negatives"] == 6
     assert 0.0 <= stats["positive_rate"] <= 1.0
+
+
+def test_arrays_from_dataset_shapes():
+    specs = build_specs(3, seed=5)
+    ds = SyntheticPatchDataset(specs, patch_size=16, cfg=small_cfg(), augment=None)
+    images, labels = arrays_from_dataset(ds)
+    assert images.shape == (3, 1, 16, 16)
+    assert labels.shape == (3,)
+    images2, labels2 = arrays_from_dataset(ds, limit=2)
+    assert images2.shape == (2, 1, 16, 16)
+
+
+def test_patch_label_counts_helper():
+    from src.medimg.patching import Patch
+
+    patches = [
+        Patch(np.zeros((4, 4), dtype=np.float32), 0, (0, 0)),
+        Patch(np.zeros((4, 4), dtype=np.float32), 1, (0, 0)),
+        Patch(np.zeros((4, 4), dtype=np.float32), 1, (0, 0)),
+    ]
+    assert patch_label_counts(patches) == {0: 1, 1: 2}
+
+
+def test_augmented_dataset_differs_from_clean_one():
+    specs = build_specs(2, seed=9)
+    clean = SyntheticPatchDataset(specs, patch_size=16, cfg=small_cfg(), augment=None, seed=1)
+    aug = SyntheticPatchDataset(
+        specs,
+        patch_size=16,
+        cfg=small_cfg(),
+        augment=AugmentConfig(p_flip=0.0, p_rot90=0.0, p_gamma=0.0, p_scale=0.0, p_noise=1.0, noise_std=0.1),
+        seed=1,
+    )
+    assert not torch.equal(clean[0]["image"], aug[0]["image"])
+    assert float(clean[0]["label"]) == float(aug[0]["label"])

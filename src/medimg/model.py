@@ -145,3 +145,11 @@ def load_checkpoint(path: str | Path) -> tuple[SmallCNN, dict]:
     model.load_state_dict(payload["state_dict"])
     model.eval()
     return model, meta
+
+
+@torch.no_grad()
+def predict_proba(model: nn.Module, images: torch.Tensor) -> np.ndarray:
+    """Positive-class probabilities for a batch, as a NumPy vector."""
+    model.eval()
+    logits = model(images)
+    return torch.sigmoid(logits).cpu().numpy().astype(np.float64)
