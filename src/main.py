@@ -316,3 +316,5 @@ if __name__ == '__main__':
 # WIP: tuning loss for imbalanced tumor labels [2026-03-03T13:53:36]
 
 # Update inference pipeline for batch DICOM [2026-03-10T20:30:19]
+
+# Fix pixel value normalization for CT scans [2026-03-16T13:17:57]
