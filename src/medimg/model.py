@@ -153,3 +153,19 @@ def predict_proba(model: nn.Module, images: torch.Tensor) -> np.ndarray:
     model.eval()
     logits = model(images)
     return torch.sigmoid(logits).cpu().numpy().astype(np.float64)
+
+
+@torch.no_grad()
+def predict_labels(model: nn.Module, images: torch.Tensor, threshold: float = 0.5) -> np.ndarray:
+    """Binary predictions at a fixed threshold."""
+    if not 0.0 <= threshold <= 1.0:
+        raise ValueError("threshold must be in [0, 1]")
+    return (predict_proba(model, images) >= threshold).astype(np.int64)
+
+
+def parameter_breakdown(model: nn.Module) -> dict[str, int]:
+    """Per-submodule parameter counts, handy when comparing widths."""
+    breakdown: dict[str, int] = {}
+    for name, module in model.named_children():
+        breakdown[name] = sum(p.numel() for p in module.parameters())
+    return breakdown
