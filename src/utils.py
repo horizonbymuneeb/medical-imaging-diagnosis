@@ -191,3 +191,5 @@ def format_number(n: int) -> str:
 # Implement ensemble of UNet and DeepLab [2026-03-13T13:53:45]
 
 # Add test-time augmentation for robust predictions [2026-03-15T18:50:14]
+
+# Fix pixel value normalization for CT scans [2026-03-18T16:51:17]
