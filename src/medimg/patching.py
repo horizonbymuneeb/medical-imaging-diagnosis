@@ -43,3 +43,55 @@ class Patch:
     @property
     def mean(self) -> float:
         return float(self.image.mean())
+
+
+def extract_patch(
+    image: np.ndarray,
+    center: Sequence[int],
+    size: int,
+    *,
+    pad_value: float = 0.0,
+) -> np.ndarray:
+    """Cut a square patch around ``center``, zero-padding at the border.
+
+    Patches are always exactly ``(size, size)`` so a batch can be stacked
+    without a second pass over the list.
+    """
+    if size <= 0 or size % 2:
+        raise ValueError("size must be a positive even integer")
+    arr = np.asarray(image, dtype=np.float32)
+    if arr.ndim != 2:
+        raise ValueError("image must be 2-D")
+    if len(center) != 2:
+        raise ValueError("center must be (row, col)")
+    half = size // 2
+    row, col = int(center[0]), int(center[1])
+    out = np.full((size, size), pad_value, dtype=np.float32)
+    r0, r1 = row - half, row + half
+    c0, c1 = col - half, col + half
+    src_r0, src_c0 = max(0, r0), max(0, c0)
+    src_r1, src_c1 = min(arr.shape[0], r1), min(arr.shape[1], c1)
+    if src_r1 <= src_r0 or src_c1 <= src_c0:
+        return out
+    out[src_r0 - r0 : src_r1 - r0, src_c0 - c0 : src_c1 - c0] = arr[src_r0:src_r1, src_c0:src_c1]
+    return out
+
+
+def lesion_components(mask: np.ndarray) -> list[dict]:
+    """Connected lesion blobs with centroid, bounding box and voxel count."""
+    arr = np.asarray(mask).astype(bool)
+    if arr.ndim != 2:
+        raise ValueError("mask must be 2-D")
+    labelled, count = ndimage.label(arr, structure=np.ones((3, 3), dtype=int))
+    blobs = []
+    for label_id in range(1, count + 1):
+        rows, cols = np.nonzero(labelled == label_id)
+        blobs.append(
+            {
+                "label": label_id,
+                "centroid": (float(rows.mean()), float(cols.mean())),
+                "bbox": (int(rows.min()), int(cols.min()), int(rows.max()), int(cols.max())),
+                "voxels": int(rows.size),
+            }
+        )
+    return blobs
