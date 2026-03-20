@@ -193,3 +193,5 @@ def format_number(n: int) -> str:
 # Add test-time augmentation for robust predictions [2026-03-15T18:50:14]
 
 # Fix pixel value normalization for CT scans [2026-03-18T16:51:17]
+
+# Implement class activation mapping overlay [2026-03-20T14:41:12]
