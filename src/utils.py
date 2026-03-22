@@ -195,3 +195,5 @@ def format_number(n: int) -> str:
 # Fix pixel value normalization for CT scans [2026-03-18T16:51:17]
 
 # Implement class activation mapping overlay [2026-03-20T14:41:12]
+
+# Implement Grad-CAM explainability heatmaps [2026-03-22T13:28:05]

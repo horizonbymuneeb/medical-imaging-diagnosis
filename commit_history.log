@@ -343,3 +343,4 @@
 [2026-03-16T13:17:57] Fix pixel value normalization for CT scans
 [2026-03-18T16:51:17] Fix pixel value normalization for CT scans
 [2026-03-20T14:41:12] Implement class activation mapping overlay
+[2026-03-22T13:28:05] Implement Grad-CAM explainability heatmaps
