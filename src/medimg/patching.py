@@ -95,3 +95,41 @@ def lesion_components(mask: np.ndarray) -> list[dict]:
             }
         )
     return blobs
+
+
+def lesion_centers(mask: np.ndarray, min_voxels: int = 1) -> list[tuple[int, int]]:
+    """Integer centroids of every lesion blob larger than ``min_voxels``."""
+    centers = []
+    for blob in lesion_components(mask):
+        if blob["voxels"] < min_voxels:
+            continue
+        row, col = blob["centroid"]
+        centers.append((int(round(row)), int(round(col))))
+    return centers
+
+
+def positive_centers(
+    mask: np.ndarray,
+    rng: np.random.Generator,
+    n: int,
+    *,
+    jitter: int = 0,
+) -> list[tuple[int, int]]:
+    """Sample ``n`` positive centres from lesion voxels.
+
+    Centres are drawn from the voxel list rather than the blob centroid so a
+    large or elongated lesion produces patches from its whole extent.  ``jitter``
+    adds uniform noise around each chosen voxel.
+    """
+    rows, cols = np.nonzero(np.asarray(mask).astype(bool))
+    if rows.size == 0:
+        raise ValueError("mask has no positive voxels")
+    picks = rng.integers(0, rows.size, size=n)
+    centers = []
+    for pick in picks:
+        row, col = int(rows[pick]), int(cols[pick])
+        if jitter:
+            row += int(rng.integers(-jitter, jitter + 1))
+            col += int(rng.integers(-jitter, jitter + 1))
+        centers.append((row, col))
+    return centers

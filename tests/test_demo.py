@@ -15,3 +15,5 @@ from src.medimg.demo import (
     phantom_section,
     run_demo,
 )
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
