@@ -133,3 +133,118 @@ def positive_centers(
             col += int(rng.integers(-jitter, jitter + 1))
         centers.append((row, col))
     return centers
+
+
+def negative_centers(
+    mask: np.ndarray,
+    rng: np.random.Generator,
+    n: int,
+    *,
+    patch_size: int,
+    min_distance: int | None = None,
+    max_tries: int = 2000,
+) -> list[tuple[int, int]]:
+    """Sample centres at least ``min_distance`` voxels away from any lesion.
+
+    The default distance is one patch size, which guarantees that a "negative"
+    patch cannot contain lesion pixels at its centre.  Sampling is rejection
+    based with a bounded number of attempts so a lesion covering the whole
+    slice raises instead of looping forever.
+    """
+    arr = np.asarray(mask).astype(bool)
+    if arr.ndim != 2:
+        raise ValueError("mask must be 2-D")
+    distance = patch_size if min_distance is None else int(min_distance)
+    if distance < 0:
+        raise ValueError("min_distance must be non-negative")
+    height, width = arr.shape
+    rows, cols = np.nonzero(arr)
+    if rows.size:
+        lesion_points = np.stack([rows, cols], axis=1).astype(np.float32)
+    else:
+        lesion_points = np.empty((0, 2), dtype=np.float32)
+    centers: list[tuple[int, int]] = []
+    attempts = 0
+    while len(centers) < n and attempts < max_tries:
+        attempts += 1
+        row = int(rng.integers(0, height))
+        col = int(rng.integers(0, width))
+        if lesion_points.size:
+            d = np.sqrt(((lesion_points - np.array([row, col], dtype=np.float32)) ** 2).sum(axis=1))
+            if float(d.min()) < distance:
+                continue
+        centers.append((row, col))
+    if len(centers) < n:
+        raise RuntimeError(
+            f"could only find {len(centers)} negative centres after {max_tries} tries; "
+            "the lesion covers too much of the slice"
+        )
+    return centers
+
+
+class PatchSampler:
+    """Draws balanced patches from one windowed slice.
+
+    ``positive_fraction`` is the target share of positives; ``0.5`` gives the
+    classifier a balanced view while ``0.1`` mimics the true prevalence and is
+    used when calibrating a prevalence-sensitive threshold.
+    """
+
+    def __init__(
+        self,
+        image: np.ndarray,
+        lesion_mask: np.ndarray,
+        patch_size: int = 32,
+        *,
+        seed: int = 0,
+        positive_fraction: float = 0.5,
+    ) -> None:
+        arr = np.asarray(image, dtype=np.float32)
+        mask = np.asarray(lesion_mask).astype(bool)
+        if arr.ndim != 2 or mask.shape != arr.shape:
+            raise ValueError("image and lesion_mask must be 2-D and the same shape")
+        if not 0.0 <= positive_fraction <= 1.0:
+            raise ValueError("positive_fraction must be in [0, 1]")
+        self.image = arr
+        self.mask = mask
+        self.patch_size = int(patch_size)
+        self.positive_fraction = float(positive_fraction)
+        self.rng = np.random.default_rng(seed)
+
+    @property
+    def has_lesion(self) -> bool:
+        return bool(self.mask.any())
+
+    def sample_positive(self, n: int) -> list[Patch]:
+        if not self.has_lesion:
+            raise ValueError("slice has no lesion voxels")
+        centers = positive_centers(self.mask, self.rng, n, jitter=self.patch_size // 8)
+        return [
+            Patch(extract_patch(self.image, c, self.patch_size), 1, c)
+            for c in centers
+        ]
+
+    def sample_negative(self, n: int) -> list[Patch]:
+        centers = negative_centers(
+            self.mask, self.rng, n, patch_size=self.patch_size, min_distance=self.patch_size
+        )
+        return [
+            Patch(extract_patch(self.image, c, self.patch_size), 0, c)
+            for c in centers
+        ]
+
+    def sample_balanced(self, n: int) -> list[Patch]:
+        """``n`` patches split according to ``positive_fraction``."""
+        if n <= 0:
+            raise ValueError("n must be positive")
+        n_pos = int(round(n * self.positive_fraction))
+        n_pos = min(n_pos, n) if self.has_lesion else 0
+        n_neg = n - n_pos
+        patches = self.sample_negative(n_neg)
+        if n_pos:
+            patches.extend(self.sample_positive(n_pos))
+        order = self.rng.permutation(len(patches))
+        return [patches[i] for i in order]
+
+    def sample(self, n: int) -> list[Patch]:
+        return self.sample_balanced(n)
