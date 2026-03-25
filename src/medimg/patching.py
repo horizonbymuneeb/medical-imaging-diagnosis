@@ -248,3 +248,52 @@ class PatchSampler:
 
     def sample(self, n: int) -> list[Patch]:
         return self.sample_balanced(n)
+
+
+def balance_patches(
+    patches: Sequence[Patch],
+    *,
+    seed: int = 0,
+    ratio: float = 1.0,
+) -> list[Patch]:
+    """Re-sample (with replacement) so positives are ``ratio`` of the negatives."""
+    if ratio <= 0:
+        raise ValueError("ratio must be positive")
+    positives = [p for p in patches if p.label == 1]
+    negatives = [p for p in patches if p.label == 0]
+    if not positives or not negatives:
+        return list(patches)
+    rng = np.random.default_rng(seed)
+    target_pos = int(round(len(negatives) * ratio))
+    chosen = list(negatives)
+    for _ in range(target_pos):
+        chosen.append(positives[int(rng.integers(0, len(positives)))])
+    order = rng.permutation(len(chosen))
+    return [chosen[i] for i in order]
+
+
+def split_patches(
+    patches: Sequence[Patch],
+    val_fraction: float = 0.25,
+    *,
+    seed: int = 0,
+) -> tuple[list[Patch], list[Patch]]:
+    """Deterministic train/validation split that keeps both classes present."""
+    if not 0.0 < val_fraction < 1.0:
+        raise ValueError("val_fraction must be in (0, 1)")
+    rng = np.random.default_rng(seed)
+    indices = rng.permutation(len(patches))
+    n_val = max(1, int(round(len(patches) * val_fraction)))
+    val_idx = set(int(i) for i in indices[:n_val])
+    train = [p for i, p in enumerate(patches) if i not in val_idx]
+    val = [p for i, p in enumerate(patches) if i in val_idx]
+    return train, val
+
+
+def patch_array(patches: Iterable[Patch]) -> tuple[np.ndarray, np.ndarray]:
+    """Stack patches into ``(N, 1, H, W)`` images and ``(N,)`` labels."""
+    images = [p.image[None, :, :] for p in patches]
+    if not images:
+        raise ValueError("no patches to stack")
+    labels = np.asarray([p.label for p in patches], dtype=np.float32)
+    return np.stack(images, axis=0), labels
