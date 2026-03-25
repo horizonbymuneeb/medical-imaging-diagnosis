@@ -199,3 +199,5 @@ def format_number(n: int) -> str:
 # Implement Grad-CAM explainability heatmaps [2026-03-22T13:28:05]
 
 # Implement class activation mapping overlay [2026-03-23T20:46:00]
+
+# Implement UNet for lesion segmentation task [2026-03-25T14:23:43]
