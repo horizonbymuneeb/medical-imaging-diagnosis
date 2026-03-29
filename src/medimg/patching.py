@@ -297,3 +297,10 @@ def patch_array(patches: Iterable[Patch]) -> tuple[np.ndarray, np.ndarray]:
         raise ValueError("no patches to stack")
     labels = np.asarray([p.label for p in patches], dtype=np.float32)
     return np.stack(images, axis=0), labels
+
+
+def class_counts(patches: Iterable[Patch]) -> dict[int, int]:
+    counts = {0: 0, 1: 0}
+    for patch in patches:
+        counts[patch.label] += 1
+    return counts

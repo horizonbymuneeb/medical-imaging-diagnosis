@@ -47,3 +47,24 @@ def test_describe_phantom_reports_lesion():
     report = describe_phantom(demo_config())
     assert report["voxels"] == 32 * 32 * 24
     assert report["lesion_voxels"] > 0
+
+
+def test_describe_window_uses_preset():
+    report = describe_window(demo_config())
+    assert report["preset"] == "brain"
+    assert 0.0 <= report["usable_fraction"] <= 1.0
+    assert report["window_low"] == 0.0
+
+
+def test_describe_patches_balances_classes():
+    report = describe_patches(demo_config())
+    assert report["requested"] == 8
+    assert sum(report["counts"].values()) == 8
+    assert report["counts"]["1"] == 4
+
+
+def test_describe_metrics_has_known_auc():
+    report = describe_metrics()
+    assert report["auc"] == pytest.approx(1.0)
+    assert report["confusion"] == [[4, 0], [0, 4]]
+    assert report["calibration"]["n"] == 8
