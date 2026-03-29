@@ -318,3 +318,5 @@ if __name__ == '__main__':
 # Update inference pipeline for batch DICOM [2026-03-10T20:30:19]
 
 # Fix pixel value normalization for CT scans [2026-03-16T13:17:57]
+
+# Add federated learning components for privacy [2026-03-29T16:35:41]
