@@ -68,3 +68,20 @@ def test_describe_metrics_has_known_auc():
     assert report["auc"] == pytest.approx(1.0)
     assert report["confusion"] == [[4, 0], [0, 4]]
     assert report["calibration"]["n"] == 8
+
+
+def test_run_demo_structure():
+    report = run_demo(demo_config())
+    assert set(report) == {"phantom", "window", "patches", "metrics"}
+
+
+def test_main_writes_json(tmp_path, capsys):
+    config_path = tmp_path / "config.yaml"
+    import yaml
+
+    config_path.write_text(yaml.safe_dump(demo_config()))
+    out = tmp_path / "demo.json"
+    assert main(["--config", str(config_path), "--out", str(out)]) == 0
+    payload = json.loads(out.read_text())
+    assert "metrics" in payload
+    assert "phantom" in capsys.readouterr().out
