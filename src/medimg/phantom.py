@@ -18,3 +18,8 @@ from typing import Iterable
 import numpy as np
 
 from src.medimg.volume import Volume
+
+# Hounsfield-unit anchors used by the generator and by the tests.
+HU_AIR = -1000.0
+HU_FAT = -90.0
+HU_CSF = 6.0
