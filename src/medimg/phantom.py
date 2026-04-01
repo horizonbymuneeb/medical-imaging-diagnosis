@@ -23,3 +23,5 @@ from src.medimg.volume import Volume
 HU_AIR = -1000.0
 HU_FAT = -90.0
 HU_CSF = 6.0
+HU_WHITE_MATTER = 32.0
+HU_GRAY_MATTER = 44.0
