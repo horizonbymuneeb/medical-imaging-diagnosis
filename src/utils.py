@@ -205,3 +205,5 @@ def format_number(n: int) -> str:
 # Implement UNet for lesion segmentation task [2026-03-30T19:14:16]
 
 # WIP: benchmarking on NIH Chest X-ray dataset [2026-03-31T14:34:29]
+
+# Add DICOM loader with metadata extraction [2026-04-08T11:26:14]
