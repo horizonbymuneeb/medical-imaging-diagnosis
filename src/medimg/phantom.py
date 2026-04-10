@@ -83,3 +83,23 @@ class PhantomConfig:
             lesion_intensity=self.lesion_intensity,
             noise_model=self.noise_model,
         )
+
+
+@dataclass(frozen=True)
+class Lesion:
+    """A spherical lesion in voxel coordinates."""
+
+    center: tuple[float, float, float]
+    radius: tuple[float, float, float]
+    intensity: float = HU_LESION
+
+    def mask(self, shape: tuple[int, int, int]) -> np.ndarray:
+        return ellipsoid_mask(shape, self.center, self.radius)
+
+
+def voxel_grid(shape: tuple[int, int, int]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return coordinate grids for a volume, in voxel units and ``float32``."""
+    if len(shape) != 3:
+        raise ValueError("shape must be 3-dimensional")
+    axes = [np.arange(int(n), dtype=np.float32) for n in shape]
+    return np.meshgrid(*axes, indexing="ij")

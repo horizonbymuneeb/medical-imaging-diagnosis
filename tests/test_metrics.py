@@ -46,3 +46,32 @@ def test_roc_points_monotone_and_anchored():
     assert np.all(np.diff(fpr) >= 0)
     assert np.all(np.diff(tpr) >= 0)
     assert np.isinf(thresholds[0])
+
+
+def test_auc_requires_both_classes():
+    with pytest.raises(ValueError):
+        auc_score(np.ones(4, dtype=int), np.linspace(0, 1, 4))
+    with pytest.raises(ValueError):
+        auc_score(np.array([0, 1]), np.array([0.2, np.nan]))
+    with pytest.raises(ValueError):
+        auc_score(np.array([0, 1]), np.array([0.2]))
+    with pytest.raises(ValueError):
+        auc_score(np.array([0, 2]), np.array([0.2, 0.3]))
+
+
+def test_sensitivity_at_specificity_handles_targets():
+    labels = np.array([0, 0, 1, 1])
+    scores = np.array([0.1, 0.2, 0.8, 0.9])
+    assert sensitivity_at_specificity(labels, scores, 0.9) == pytest.approx(1.0)
+    assert sensitivity_at_specificity(labels, scores, 0.5) == pytest.approx(1.0)
+    with pytest.raises(ValueError):
+        sensitivity_at_specificity(labels, scores, 1.0)
+
+
+def test_specificity_at_sensitivity_mirrors():
+    labels = np.array([0, 0, 1, 1])
+    scores = np.array([0.1, 0.2, 0.8, 0.9])
+    assert specificity_at_sensitivity(labels, scores, 1.0) == pytest.approx(1.0)
+    assert specificity_at_sensitivity(labels, scores, 0.5) == pytest.approx(1.0)
+    with pytest.raises(ValueError):
+        specificity_at_sensitivity(labels, scores, 0.0)
