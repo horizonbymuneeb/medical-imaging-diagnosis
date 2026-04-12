@@ -209,3 +209,5 @@ def format_number(n: int) -> str:
 # Add DICOM loader with metadata extraction [2026-04-08T11:26:14]
 
 # WIP: benchmarking on NIH Chest X-ray dataset [2026-04-10T11:58:37]
+
+# WIP: fixing data augmentation pipeline bug [2026-04-12T17:50:53]

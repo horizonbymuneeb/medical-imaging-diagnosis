@@ -355,3 +355,4 @@
 [2026-04-08T11:14:58] Implement ensemble of UNet and DeepLab
 [2026-04-08T11:26:14] Add DICOM loader with metadata extraction
 [2026-04-10T11:58:37] WIP: benchmarking on NIH Chest X-ray dataset
+[2026-04-12T17:50:53] WIP: fixing data augmentation pipeline bug
