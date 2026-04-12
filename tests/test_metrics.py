@@ -75,3 +75,42 @@ def test_specificity_at_sensitivity_mirrors():
     assert specificity_at_sensitivity(labels, scores, 0.5) == pytest.approx(1.0)
     with pytest.raises(ValueError):
         specificity_at_sensitivity(labels, scores, 0.0)
+
+
+def test_confusion_matrix_layout_is_true_by_predicted():
+    y_true = [0, 0, 1, 1, 1]
+    y_pred = [0, 1, 1, 1, 0]
+    matrix = confusion_matrix(y_true, y_pred)
+    assert matrix.tolist() == [[1, 1], [1, 2]]
+    assert matrix.sum() == 5
+    with pytest.raises(ValueError):
+        confusion_matrix([0, 1], [0])
+    with pytest.raises(ValueError):
+        confusion_matrix([0, 2], [0, 1])
+
+
+def test_per_class_metrics_exact_values():
+    matrix = np.array([[1, 1], [1, 2]])
+    metrics = per_class_metrics(matrix)
+    assert metrics[0]["precision"] == pytest.approx(0.5)
+    assert metrics[0]["recall"] == pytest.approx(0.5)
+    assert metrics[0]["support"] == pytest.approx(2.0)
+    assert metrics[1]["precision"] == pytest.approx(2 / 3)
+    assert metrics[1]["recall"] == pytest.approx(2 / 3)
+    assert metrics[1]["f1"] == pytest.approx(2 / 3)
+    with pytest.raises(ValueError):
+        per_class_metrics(np.zeros((2, 3)))
+    with pytest.raises(ValueError):
+        per_class_metrics(matrix, labels=(0, 1, 2))
+
+
+def test_precision_recall_f1_and_accuracy():
+    y_true = [0, 0, 1, 1]
+    y_pred = [0, 1, 1, 1]
+    result = precision_recall_f1(y_true, y_pred)
+    assert result["precision"] == pytest.approx(2 / 3)
+    assert result["recall"] == pytest.approx(1.0)
+    assert result["f1"] == pytest.approx(0.8)
+    assert accuracy_score(y_true, y_pred) == pytest.approx(0.75)
+    with pytest.raises(ValueError):
+        accuracy_score([0, 1], [1])

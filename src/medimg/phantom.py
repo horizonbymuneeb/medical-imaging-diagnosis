@@ -103,3 +103,41 @@ def voxel_grid(shape: tuple[int, int, int]) -> tuple[np.ndarray, np.ndarray, np.
         raise ValueError("shape must be 3-dimensional")
     axes = [np.arange(int(n), dtype=np.float32) for n in shape]
     return np.meshgrid(*axes, indexing="ij")
+
+
+def ellipsoid_mask(
+    shape: tuple[int, int, int],
+    center: Iterable[float],
+    radii: Iterable[float],
+) -> np.ndarray:
+    """Boolean mask of an axis-aligned ellipsoid.
+
+    The mask is ``True`` where ``sum(((x - c) / r) ** 2) <= 1``.  A radius of
+    zero raises instead of silently producing an empty mask, because that is
+    almost always a units bug (mm passed where voxels were expected).
+    """
+    center = tuple(float(c) for c in center)
+    radii = tuple(float(r) for r in radii)
+    if len(center) != 3 or len(radii) != 3:
+        raise ValueError("center and radii must have length 3")
+    if any(r <= 0 for r in radii):
+        raise ValueError(f"radii must be positive, got {radii!r}")
+    grids = voxel_grid(tuple(int(s) for s in shape))
+    dist = np.zeros(tuple(int(s) for s in shape), dtype=np.float32)
+    for grid, c, r in zip(grids, center, radii):
+        dist += ((grid - c) / r) ** 2
+    return dist <= 1.0
+
+
+def shell_mask(
+    shape: tuple[int, int, int],
+    center: Iterable[float],
+    radii: Iterable[float],
+    inner_scale: float,
+) -> np.ndarray:
+    """Mask of a shell between ``radii`` and ``radii * inner_scale``."""
+    if not 0.0 < inner_scale < 1.0:
+        raise ValueError("inner_scale must be in (0, 1)")
+    outer = ellipsoid_mask(shape, center, radii)
+    inner = ellipsoid_mask(shape, center, [r * inner_scale for r in radii])
+    return outer & ~inner
