@@ -357,3 +357,4 @@
 [2026-04-10T11:58:37] WIP: benchmarking on NIH Chest X-ray dataset
 [2026-04-12T17:50:53] WIP: fixing data augmentation pipeline bug
 [2026-04-14T11:33:30] WIP: fixing data augmentation pipeline bug
+[2026-04-14T15:23:21] Add MONAI transforms for medical images
