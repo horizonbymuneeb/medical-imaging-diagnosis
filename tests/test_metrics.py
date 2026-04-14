@@ -114,3 +114,38 @@ def test_precision_recall_f1_and_accuracy():
     assert accuracy_score(y_true, y_pred) == pytest.approx(0.75)
     with pytest.raises(ValueError):
         accuracy_score([0, 1], [1])
+
+
+def test_best_threshold_youden_and_f1():
+    labels = np.array([0, 0, 0, 1, 1, 1])
+    scores = np.array([0.1, 0.2, 0.6, 0.55, 0.8, 0.9])
+    fpr, tpr, thresholds = roc_points(labels, scores)
+    j_scores = tpr - fpr
+    youden = best_threshold(labels, scores, "youden")
+    picked = int(np.argmin(np.abs(thresholds - youden)))
+    assert j_scores[picked] == pytest.approx(float(j_scores.max()))
+    pred = (scores >= youden).astype(int)
+    assert confusion_matrix(labels, pred).sum() == len(labels)
+    assert accuracy_score(labels, pred) >= 5 / 6 - 1e-12
+    f1_threshold = best_threshold(labels, scores, "f1")
+    assert 0.0 < f1_threshold <= 1.0
+    with pytest.raises(ValueError):
+        best_threshold(labels, scores, "accuracy")
+
+
+def test_threshold_sweep_reports_rows():
+    labels = np.array([0, 1, 0, 1])
+    scores = np.array([0.1, 0.9, 0.2, 0.8])
+    rows = threshold_sweep(labels, scores, thresholds=[0.3, 0.85])
+    assert len(rows) == 2
+    assert rows[0]["threshold"] == pytest.approx(0.3)
+    assert rows[0]["recall"] == pytest.approx(1.0)
+    assert rows[1]["precision"] == pytest.approx(1.0)
+
+
+def test_classification_report_dict_is_serialisable():
+    report = classification_report_dict([0, 1, 1, 0], [0, 1, 0, 0])
+    assert report["accuracy"] == pytest.approx(0.75)
+    assert report["confusion_matrix"] == [[2, 0], [1, 1]]
+    assert set(report["per_class"]) == {"0", "1"}
+    assert report["support"] == pytest.approx(4.0)

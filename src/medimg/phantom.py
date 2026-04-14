@@ -172,3 +172,38 @@ def draw_lesion(
     else:
         out[mask] = lesion.intensity
     return out
+
+
+def add_gaussian_noise(
+    data: np.ndarray,
+    sigma: float,
+    rng: np.random.Generator,
+    *,
+    mask: np.ndarray | None = None,
+) -> np.ndarray:
+    """Add zero-mean Gaussian noise, optionally only inside ``mask``."""
+    if sigma < 0:
+        raise ValueError("sigma must be non-negative")
+    noise = rng.normal(0.0, sigma, size=data.shape).astype(np.float32)
+    out = np.array(data, dtype=np.float32, copy=True)
+    if mask is None:
+        return out + noise
+    out[mask] = out[mask] + noise[mask]
+    return out
+
+
+def add_rician_noise(
+    data: np.ndarray,
+    sigma: float,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    """Rician noise, the usual model for magnitude MR images.
+
+    Two independent Gaussian channels are added and the magnitude is taken, so
+    the noise is signal-dependent near zero and strictly positive.
+    """
+    if sigma < 0:
+        raise ValueError("sigma must be non-negative")
+    real = data + rng.normal(0.0, sigma, size=data.shape)
+    imag = rng.normal(0.0, sigma, size=data.shape)
+    return np.sqrt(real**2 + imag**2).astype(np.float32)
