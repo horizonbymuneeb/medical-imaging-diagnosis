@@ -141,3 +141,34 @@ def shell_mask(
     outer = ellipsoid_mask(shape, center, radii)
     inner = ellipsoid_mask(shape, center, [r * inner_scale for r in radii])
     return outer & ~inner
+
+
+def head_center(shape: tuple[int, int, int]) -> tuple[float, float, float]:
+    return tuple((n - 1) / 2.0 for n in shape)
+
+
+def head_radii(cfg: PhantomConfig) -> tuple[float, float, float]:
+    """In-plane radius from the config, with the slice axis stretched to fit."""
+    base = cfg.head_radius_fraction * min(cfg.shape[0], cfg.shape[1])
+    return (base, base, base * 1.05)
+
+
+def draw_lesion(
+    data: np.ndarray,
+    lesion: Lesion,
+    *,
+    blend: bool = False,
+) -> np.ndarray:
+    """Write a lesion into ``data`` (a copy) and return it.
+
+    With ``blend=True`` the lesion intensity is added on top of the local
+    tissue value instead of replacing it, which produces a slightly brighter
+    rim after windowing.
+    """
+    out = np.array(data, dtype=np.float32, copy=True)
+    mask = lesion.mask(tuple(int(s) for s in out.shape))
+    if blend:
+        out[mask] = out[mask] + lesion.intensity
+    else:
+        out[mask] = lesion.intensity
+    return out
