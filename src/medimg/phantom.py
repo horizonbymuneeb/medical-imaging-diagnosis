@@ -207,3 +207,67 @@ def add_rician_noise(
     real = data + rng.normal(0.0, sigma, size=data.shape)
     imag = rng.normal(0.0, sigma, size=data.shape)
     return np.sqrt(real**2 + imag**2).astype(np.float32)
+
+
+def random_lesion_center(
+    cfg: PhantomConfig,
+    rng: np.random.Generator,
+    *,
+    margin: float = 0.35,
+) -> tuple[float, float, float]:
+    """Pick a lesion centre inside the brain but away from the skull."""
+    center = head_center(cfg.shape)
+    radii = head_radii(cfg)
+    limit = [r * (1.0 - margin) for r in radii]
+    offsets = [rng.uniform(-lim, lim) for lim in limit]
+    return tuple(c + o for c, o in zip(center, offsets))
+
+
+def brain_phantom(cfg: PhantomConfig) -> tuple[np.ndarray, np.ndarray]:
+    """Build one head phantom.
+
+    Returns ``(data, lesion_mask)`` where ``data`` is a float32 volume in HU
+    and ``lesion_mask`` marks the hyperdense lesion voxels.  The image is
+    deterministic for a given ``cfg.seed``.
+    """
+    rng = np.random.default_rng(cfg.seed)
+    shape = tuple(int(s) for s in cfg.shape)
+    center = head_center(shape)
+    radii = head_radii(cfg)
+
+    data = np.full(shape, HU_AIR, dtype=np.float32)
+    # Scalp/soft tissue envelope, then skull ring, then brain parenchyma.
+    data[ellipsoid_mask(shape, center, radii)] = HU_SOFT_TISSUE
+    data[shell_mask(shape, center, radii, inner_scale=0.88)] = HU_BONE
+    brain_mask = ellipsoid_mask(shape, center, [r * 0.84 for r in radii])
+    data[brain_mask] = HU_WHITE_MATTER
+
+    # Grey-matter ribbon and a pair of ventricles give the slice real texture.
+    gm = shell_mask(shape, center, [r * 0.84 for r in radii], inner_scale=0.93)
+    data[gm] = HU_GRAY_MATTER
+    for sign in (-1.0, 1.0):
+        vent_center = (
+            center[0] + sign * radii[0] * 0.10,
+            center[1] + radii[1] * 0.06,
+            center[2],
+        )
+        vent = ellipsoid_mask(
+            shape, vent_center, [radii[0] * 0.10, radii[1] * 0.22, radii[2] * 0.16]
+        )
+        data[vent & brain_mask] = HU_CSF
+
+    lesion = Lesion(
+        center=random_lesion_center(cfg, rng),
+        radius=cfg.lesion_radius_voxels,
+        intensity=cfg.lesion_intensity,
+    )
+    lesion_mask = lesion.mask(shape) & brain_mask
+    data[lesion_mask] = lesion.intensity
+
+    if cfg.noise_sigma > 0:
+        if cfg.noise_model == "rician":
+            data = add_rician_noise(data, cfg.noise_sigma, rng)
+        else:
+            data = add_gaussian_noise(data, cfg.noise_sigma, rng)
+
+    return data.astype(np.float32), lesion_mask
