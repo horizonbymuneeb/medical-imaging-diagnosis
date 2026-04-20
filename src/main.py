@@ -330,3 +330,5 @@ if __name__ == '__main__':
 # Implement ensemble of UNet and DeepLab [2026-04-08T11:14:58]
 
 # WIP: fixing data augmentation pipeline bug [2026-04-14T11:33:30]
+
+# Implement Grad-CAM explainability heatmaps [2026-04-20T18:39:54]

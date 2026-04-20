@@ -358,3 +358,4 @@
 [2026-04-12T17:50:53] WIP: fixing data augmentation pipeline bug
 [2026-04-14T11:33:30] WIP: fixing data augmentation pipeline bug
 [2026-04-14T15:23:21] Add MONAI transforms for medical images
+[2026-04-20T18:39:54] Implement Grad-CAM explainability heatmaps
