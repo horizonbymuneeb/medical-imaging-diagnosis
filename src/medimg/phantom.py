@@ -305,3 +305,25 @@ def phantom_slice(
     if not 0 <= index < n:
         raise IndexError(f"slice {index} out of range for axis {axis} with size {n}")
     return np.take(volume.data, index, axis=axis)
+
+
+def lesion_slice_index(lesion_mask: np.ndarray, axis: int = 2) -> int:
+    """Slice index with the most lesion voxels along ``axis``."""
+    if lesion_mask.ndim != 3:
+        raise ValueError("lesion_mask must be 3-D")
+    counts = lesion_mask.sum(axis=tuple(a for a in (0, 1, 2) if a != axis))
+    return int(np.argmax(counts))
+
+
+def phantom_summary(cfg: PhantomConfig) -> dict[str, float]:
+    """Cheap geometry summary used by the demo script and the README table."""
+    data, lesion = brain_phantom(cfg)
+    head = data > HU_AIR + 1.0
+    return {
+        "voxels": float(data.size),
+        "head_voxels": float(head.sum()),
+        "lesion_voxels": float(lesion.sum()),
+        "lesion_mm3": float(lesion.sum() * cfg.voxel_volume_mm3),
+        "hu_min": float(data.min()),
+        "hu_max": float(data.max()),
+    }
