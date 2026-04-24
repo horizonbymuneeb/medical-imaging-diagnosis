@@ -271,3 +271,37 @@ def brain_phantom(cfg: PhantomConfig) -> tuple[np.ndarray, np.ndarray]:
             data = add_gaussian_noise(data, cfg.noise_sigma, rng)
 
     return data.astype(np.float32), lesion_mask
+
+
+def make_phantom_pair(cfg: PhantomConfig | None = None) -> tuple[Volume, np.ndarray]:
+    """Return a :class:`Volume` plus its lesion mask."""
+    cfg = cfg or PhantomConfig()
+    data, lesion_mask = brain_phantom(cfg)
+    volume = Volume(
+        data=data,
+        spacing=cfg.spacing,
+        origin=(0.0, 0.0, 0.0),
+        modality="CT",
+        meta={"seed": cfg.seed, "lesion_radius_mm": cfg.lesion_radius_mm},
+    )
+    return volume, lesion_mask
+
+
+def phantom_slice(
+    volume: Volume,
+    axis: int = 2,
+    index: int | None = None,
+) -> np.ndarray:
+    """Take one 2-D slice through a phantom volume.
+
+    ``index=None`` selects the slice with the largest lesion cross-section when
+    a mask is available in ``volume.meta``; otherwise the middle slice.
+    """
+    if axis not in (0, 1, 2):
+        raise ValueError("axis must be 0, 1 or 2")
+    n = volume.shape[axis]
+    if index is None:
+        index = n // 2
+    if not 0 <= index < n:
+        raise IndexError(f"slice {index} out of range for axis {axis} with size {n}")
+    return np.take(volume.data, index, axis=axis)
