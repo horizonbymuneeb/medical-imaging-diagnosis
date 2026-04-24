@@ -215,3 +215,5 @@ def format_number(n: int) -> str:
 # Add MONAI transforms for medical images [2026-04-14T15:23:21]
 
 # Implement Grad-CAM explainability heatmaps [2026-04-24T19:39:27]
+
+# Add test-time augmentation for robust predictions [2026-04-24T10:05:52]
