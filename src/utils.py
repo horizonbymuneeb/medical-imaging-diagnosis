@@ -217,3 +217,5 @@ def format_number(n: int) -> str:
 # Implement Grad-CAM explainability heatmaps [2026-04-24T19:39:27]
 
 # Add test-time augmentation for robust predictions [2026-04-24T10:05:52]
+
+# Implement active learning for label efficiency [2026-04-25T14:57:59]
