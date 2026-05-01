@@ -221,3 +221,5 @@ def format_number(n: int) -> str:
 # Implement active learning for label efficiency [2026-04-25T14:57:59]
 
 # Implement UNet for lesion segmentation task [2026-04-28T14:09:28]
+
+# WIP: benchmarking on NIH Chest X-ray dataset [2026-05-01T12:28:12]
