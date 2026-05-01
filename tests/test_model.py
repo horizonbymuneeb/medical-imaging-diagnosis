@@ -41,3 +41,26 @@ def test_forward_returns_one_logit_per_sample():
     assert out.shape == (3,)
     with pytest.raises(ValueError):
         model(torch.zeros(1, 32, 32))
+
+
+def test_forward_accepts_other_patch_sizes():
+    model = make_model(base_channels=4, seed=0)
+    for size in (16, 48):
+        assert model(torch.zeros(1, 1, size, size)).shape == (1,)
+
+
+def test_parameter_count_matches_manual_sum():
+    model = make_model(base_channels=8, seed=1)
+    manual = sum(p.numel() for p in model.parameters())
+    assert count_parameters(model, trainable_only=False) == manual
+    assert count_parameters(model) == manual
+    breakdown = parameter_breakdown(model)
+    assert breakdown["features"] > 0 and breakdown["head"] > 0
+    assert sum(breakdown.values()) == manual
+
+
+def test_seeded_init_is_reproducible():
+    a = make_model(base_channels=4, seed=3)
+    b = make_model(base_channels=4, seed=3)
+    for pa, pb in zip(a.parameters(), b.parameters()):
+        assert torch.equal(pa, pb)
