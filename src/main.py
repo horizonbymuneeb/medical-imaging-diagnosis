@@ -332,3 +332,5 @@ if __name__ == '__main__':
 # WIP: fixing data augmentation pipeline bug [2026-04-14T11:33:30]
 
 # Implement Grad-CAM explainability heatmaps [2026-04-20T18:39:54]
+
+# Implement class activation mapping overlay [2026-05-02T10:16:50]
