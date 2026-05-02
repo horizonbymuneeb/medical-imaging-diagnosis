@@ -115,3 +115,39 @@ class EarlyStopping:
             "min_delta": self.min_delta,
             "mode": self.mode,
         }
+
+
+def set_seed(seed: int) -> None:
+    """Seed NumPy and Torch so a run is reproducible on CPU."""
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.use_deterministic_algorithms(False)
+
+
+def _to_device(batch: dict[str, torch.Tensor], device: str) -> tuple[torch.Tensor, torch.Tensor]:
+    return batch["image"].to(device), batch["label"].to(device)
+
+
+def train_one_epoch(
+    model: nn.Module,
+    loader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    criterion: nn.Module,
+    device: str = "cpu",
+) -> float:
+    """One pass over ``loader``; returns the mean batch loss."""
+    model.train()
+    total = 0.0
+    n_batches = 0
+    for batch in loader:
+        images, labels = _to_device(batch, device)
+        optimizer.zero_grad(set_to_none=True)
+        logits = model(images)
+        loss = criterion(logits, labels)
+        loss.backward()
+        optimizer.step()
+        total += float(loss.item())
+        n_batches += 1
+    if n_batches == 0:
+        raise ValueError("loader produced no batches")
+    return total / n_batches
