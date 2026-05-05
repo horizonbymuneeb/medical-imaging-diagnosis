@@ -64,3 +64,32 @@ def test_seeded_init_is_reproducible():
     b = make_model(base_channels=4, seed=3)
     for pa, pb in zip(a.parameters(), b.parameters()):
         assert torch.equal(pa, pb)
+
+
+def test_checkpoint_roundtrip_preserves_predictions(tmp_path):
+    model = make_model(base_channels=4, dropout=0.0, seed=2)
+    x = torch.randn(4, 1, 32, 32)
+    before = predict_proba(model, x)
+    path = save_checkpoint(model, tmp_path / "ckpt.pt", {"base_channels": 4, "dropout": 0.0, "patch_size": 32})
+    loaded, meta = load_checkpoint(path)
+    after = predict_proba(loaded, x)
+    assert meta["base_channels"] == 4
+    assert np.allclose(before, after, atol=1e-6)
+    assert path.exists()
+
+
+def test_load_checkpoint_missing_file_raises(tmp_path):
+    with pytest.raises(FileNotFoundError):
+        load_checkpoint(tmp_path / "nope.pt")
+
+
+def test_predict_labels_threshold_behaviour():
+    model = make_model(base_channels=4, dropout=0.0, seed=4)
+    x = torch.randn(5, 1, 32, 32)
+    probs = predict_proba(model, x)
+    assert probs.shape == (5,)
+    assert ((probs >= 0.0) & (probs <= 1.0)).all()
+    assert (predict_labels(model, x, threshold=0.0) == 1).all()
+    assert (predict_labels(model, x, threshold=1.0) == 0).all()
+    with pytest.raises(ValueError):
+        predict_labels(model, x, threshold=1.5)

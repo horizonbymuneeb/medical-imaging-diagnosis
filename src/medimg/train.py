@@ -151,3 +151,86 @@ def train_one_epoch(
     if n_batches == 0:
         raise ValueError("loader produced no batches")
     return total / n_batches
+
+
+@torch.no_grad()
+def evaluate_epoch(
+    model: nn.Module,
+    loader: DataLoader,
+    criterion: nn.Module | None = None,
+    device: str = "cpu",
+) -> dict[str, np.ndarray | float]:
+    """Validation loss plus probabilities and labels for metric computation."""
+    model.eval()
+    probs: list[np.ndarray] = []
+    labels: list[np.ndarray] = []
+    total = 0.0
+    n_batches = 0
+    for batch in loader:
+        images, target = _to_device(batch, device)
+        logits = model(images)
+        if criterion is not None:
+            total += float(criterion(logits, target).item())
+            n_batches += 1
+        probs.append(torch.sigmoid(logits).cpu().numpy())
+        labels.append(target.cpu().numpy())
+    return {
+        "loss": (total / n_batches) if n_batches else float("nan"),
+        "probs": np.concatenate(probs) if probs else np.empty(0),
+        "labels": np.concatenate(labels) if labels else np.empty(0),
+    }
+
+
+def fit(
+    model: SmallCNN,
+    train_loader: DataLoader,
+    val_loader: DataLoader,
+    cfg: TrainConfig,
+    *,
+    verbose: bool = False,
+) -> dict:
+    """Train with early stopping and return a history dictionary.
+
+    The returned ``history`` contains per-epoch losses, the best epoch, whether
+    stopping triggered, and the restored validation probabilities so the caller
+    can compute AUC/calibration on the exact weights that were kept.
+    """
+    set_seed(cfg.seed)
+    device = cfg.device
+    model.to(device)
+    criterion = nn.BCEWithLogitsLoss(
+        pos_weight=torch.tensor([cfg.pos_weight], dtype=torch.float32, device=device)
+    )
+    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay)
+    stopper = EarlyStopping(patience=cfg.patience, min_delta=cfg.min_delta, mode="min")
+    history: dict = {
+        "train_loss": [],
+        "val_loss": [],
+        "best_epoch": -1,
+        "stopped_early": False,
+        "epochs_run": 0,
+        "val_probs": np.empty(0),
+        "val_labels": np.empty(0),
+    }
+    start = time.time()
+    for epoch in range(cfg.epochs):
+        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
+        metrics = evaluate_epoch(model, val_loader, criterion, device)
+        history["train_loss"].append(train_loss)
+        history["val_loss"].append(float(metrics["loss"]))
+        history["epochs_run"] = epoch + 1
+        if verbose:
+            print(f"epoch {epoch + 1:02d} train={train_loss:.4f} val={metrics['loss']:.4f}")
+        stop = stopper.step(float(metrics["loss"]), epoch, model)
+        if stop:
+            history["stopped_early"] = True
+            break
+    history["best_epoch"] = stopper.best_epoch
+    history["best_val_loss"] = stopper.best
+    stopper.restore(model)
+    final = evaluate_epoch(model, val_loader, criterion, device)
+    history["val_probs"] = final["probs"]
+    history["val_labels"] = final["labels"]
+    history["seconds"] = time.time() - start
+    history["early_stopping"] = stopper.state_dict()
+    return history
