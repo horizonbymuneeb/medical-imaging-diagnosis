@@ -365,3 +365,4 @@
 [2026-04-28T14:09:28] Implement UNet for lesion segmentation task
 [2026-05-01T12:28:12] WIP: benchmarking on NIH Chest X-ray dataset
 [2026-05-02T10:16:50] Implement class activation mapping overlay
+[2026-05-05T18:00:38] Add test-time augmentation for robust predictions
