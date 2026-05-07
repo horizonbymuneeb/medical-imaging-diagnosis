@@ -234,3 +234,51 @@ def fit(
     history["seconds"] = time.time() - start
     history["early_stopping"] = stopper.state_dict()
     return history
+
+
+def build_from_config(config: dict, *, seed: int | None = None) -> dict:
+    """Build model + loaders from a parsed ``config.yaml`` dict."""
+    phantom = config.get("phantom", {})
+    train_cfg = config.get("train", {})
+    model_cfg = config.get("model", {})
+    seed = int(seed if seed is not None else train_cfg.get("seed", 11))
+    from src.medimg.phantom import PhantomConfig
+
+    pcfg = PhantomConfig(
+        shape=tuple(phantom.get("shape", (64, 64, 48))),
+        spacing=tuple(phantom.get("spacing", (1.5, 1.5, 2.0))),
+        lesion_radius_mm=float(phantom.get("lesion_radius_mm", 6.0)),
+        noise_sigma=float(phantom.get("noise_sigma", 18.0)),
+        seed=int(phantom.get("seed", 7)),
+    )
+    specs = build_specs(
+        int(config.get("patching", {}).get("patches_per_epoch", 96)),
+        seed=seed,
+        positive_fraction=float(config.get("patching", {}).get("positive_fraction", 0.5)),
+    )
+    train_loader, val_loader = make_dataloaders(
+        specs,
+        batch_size=int(train_cfg.get("batch_size", 16)),
+        val_fraction=float(train_cfg.get("val_fraction", 0.25)),
+        patch_size=int(config.get("patching", {}).get("patch_size", 32)),
+        cfg=pcfg,
+        seed=seed,
+    )
+    model = make_model(
+        in_channels=int(model_cfg.get("in_channels", 1)),
+        base_channels=int(model_cfg.get("base_channels", 16)),
+        dropout=float(model_cfg.get("dropout", 0.1)),
+        patch_size=int(config.get("patching", {}).get("patch_size", 32)),
+        seed=seed,
+    )
+    cfg = TrainConfig(
+        epochs=int(train_cfg.get("epochs", 6)),
+        batch_size=int(train_cfg.get("batch_size", 16)),
+        lr=float(train_cfg.get("lr", 3e-3)),
+        weight_decay=float(train_cfg.get("weight_decay", 1e-4)),
+        patience=int(train_cfg.get("patience", 2)),
+        min_delta=float(train_cfg.get("min_delta", 1e-3)),
+        seed=seed,
+        val_fraction=float(train_cfg.get("val_fraction", 0.25)),
+    )
+    return {"model": model, "train_loader": train_loader, "val_loader": val_loader, "cfg": cfg}

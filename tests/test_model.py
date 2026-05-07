@@ -93,3 +93,11 @@ def test_predict_labels_threshold_behaviour():
     assert (predict_labels(model, x, threshold=1.0) == 0).all()
     with pytest.raises(ValueError):
         predict_labels(model, x, threshold=1.5)
+
+
+def test_smallcnn_uses_global_pooling_head():
+    model = SmallCNN(ModelConfig(base_channels=2))
+    assert isinstance(model.head[0], torch.nn.AdaptiveAvgPool2d)
+    features = model.features_for(torch.zeros(1, 1, 32, 32))
+    assert features.shape[0] == 1
+    assert features.shape[-1] == 4  # 32 -> 16 -> 8 -> 4
