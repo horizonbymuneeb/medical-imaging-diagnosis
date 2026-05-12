@@ -225,3 +225,5 @@ def format_number(n: int) -> str:
 # WIP: benchmarking on NIH Chest X-ray dataset [2026-05-01T12:28:12]
 
 # Update CI pipeline for medical compliance [2026-05-07T12:44:55]
+
+# Add DICOM loader with metadata extraction [2026-05-12T10:08:55]
