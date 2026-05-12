@@ -282,3 +282,44 @@ def build_from_config(config: dict, *, seed: int | None = None) -> dict:
         val_fraction=float(train_cfg.get("val_fraction", 0.25)),
     )
     return {"model": model, "train_loader": train_loader, "val_loader": val_loader, "cfg": cfg}
+
+
+def main(argv: Iterable[str] | None = None) -> int:
+    """CLI: ``python -m src.medimg.train --config config.yaml``."""
+    parser = argparse.ArgumentParser(description="Train the phantom lesion classifier")
+    parser.add_argument("--config", default="config.yaml", help="path to the YAML config")
+    parser.add_argument("--out", default="artifacts/run.json", help="where to write the run summary")
+    args = parser.parse_args(list(argv) if argv is not None else None)
+
+    from src.medimg.config import load_config
+    from src.medimg.metrics import auc_score, sensitivity_at_specificity
+
+    config = load_config(args.config)
+    bundle = build_from_config(config)
+    history = fit(
+        bundle["model"], bundle["train_loader"], bundle["val_loader"], bundle["cfg"], verbose=True
+    )
+    probs = history["val_probs"]
+    labels = history["val_labels"]
+    summary = {
+        "epochs_run": history["epochs_run"],
+        "best_epoch": history["best_epoch"],
+        "stopped_early": history["stopped_early"],
+        "best_val_loss": history["best_val_loss"],
+        "val_auc": float(auc_score(labels, probs)) if len(set(labels.tolist())) > 1 else None,
+        "sens_at_90spec": (
+            float(sensitivity_at_specificity(labels, probs, 0.9))
+            if len(set(labels.tolist())) > 1
+            else None
+        ),
+        "seconds": round(float(history["seconds"]), 2),
+    }
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(summary, indent=2))
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
