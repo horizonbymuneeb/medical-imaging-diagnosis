@@ -100,3 +100,39 @@ def validate_volume(volume: Volume) -> None:
         raise ValueError(
             "anisotropy above 10x is not supported by the resampler; resample upstream"
         )
+
+
+def save_volume(volume: Volume, path: str | Path) -> Path:
+    """Save a volume to a ``.npz`` archive with its metadata."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(
+        path,
+        data=volume.data,
+        spacing=np.asarray(volume.spacing, dtype=np.float64),
+        origin=np.asarray(volume.origin, dtype=np.float64),
+        modality=np.asarray(volume.modality),
+        meta=np.asarray(json.dumps(volume.meta)),
+    )
+    return path
+
+
+def load_volume(path: str | Path) -> Volume:
+    """Load a volume written by :func:`save_volume`."""
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"no volume at {path}")
+    with np.load(path, allow_pickle=False) as archive:
+        missing = {"data", "spacing", "origin", "modality"} - set(archive.files)
+        if missing:
+            raise ValueError(f"{path} is missing keys: {sorted(missing)}")
+        meta = {}
+        if "meta" in archive.files:
+            meta = json.loads(str(archive["meta"]))
+        return Volume(
+            data=archive["data"],
+            spacing=tuple(float(s) for s in archive["spacing"]),
+            origin=tuple(float(o) for o in archive["origin"]),
+            modality=str(archive["modality"]),
+            meta=meta,
+        )
