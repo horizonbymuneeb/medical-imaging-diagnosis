@@ -227,3 +227,5 @@ def format_number(n: int) -> str:
 # Update CI pipeline for medical compliance [2026-05-07T12:44:55]
 
 # Add DICOM loader with metadata extraction [2026-05-12T10:08:55]
+
+# Implement Grad-CAM explainability heatmaps [2026-05-13T12:09:38]
