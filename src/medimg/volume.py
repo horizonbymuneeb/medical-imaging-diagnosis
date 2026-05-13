@@ -82,3 +82,21 @@ class Volume:
             modality=self.modality,
             meta=meta,
         )
+
+
+def as_volume(data: np.ndarray, spacing: Sequence[float] | None = None) -> Volume:
+    """Wrap an array in a :class:`Volume`, inferring a unit spacing."""
+    spacing = tuple(float(s) for s in (spacing or (1.0, 1.0, 1.0)))
+    return Volume(data=np.asarray(data), spacing=spacing)
+
+
+def validate_volume(volume: Volume) -> None:
+    """Raise ``ValueError`` for metadata that would break downstream maths."""
+    if volume.modality not in {"CT", "MR", "PT", "US", "SYNTH"}:
+        raise ValueError(f"unsupported modality {volume.modality!r}")
+    if not np.isfinite(volume.data).all():
+        raise ValueError("volume contains NaN or infinite voxels")
+    if max(volume.spacing) / min(volume.spacing) > 10.0:
+        raise ValueError(
+            "anisotropy above 10x is not supported by the resampler; resample upstream"
+        )
