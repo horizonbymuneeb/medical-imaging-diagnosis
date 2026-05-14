@@ -136,3 +136,62 @@ def load_volume(path: str | Path) -> Volume:
             modality=str(archive["modality"]),
             meta=meta,
         )
+
+
+def resample_to_spacing(volume: Volume, target_spacing: Sequence[float], order: int = 1) -> Volume:
+    """Resample to isotropic-ish target spacing with a spline zoom.
+
+    ``order=1`` (trilinear) is the default because cubic interpolation can
+    overshoot the bone/air boundary and invent HU values above 3000.
+    """
+    target = tuple(float(s) for s in target_spacing)
+    if len(target) != 3 or any(s <= 0 for s in target):
+        raise ValueError("target_spacing must be three positive floats")
+    if order not in (0, 1, 2, 3):
+        raise ValueError("order must be 0..3")
+    factors = [cur / tgt for cur, tgt in zip(volume.spacing, target)]
+    if all(abs(f - 1.0) < 1e-9 for f in factors):
+        return volume
+    zoomed = ndimage.zoom(volume.data, factors, order=order, grid_mode=False)
+    meta = dict(volume.meta)
+    meta["resampled_to"] = target
+    meta["source_spacing"] = volume.spacing
+    return Volume(
+        data=zoomed.astype(np.float32),
+        spacing=target,
+        origin=volume.origin,
+        modality=volume.modality,
+        meta=meta,
+    )
+
+
+def crop_or_pad(volume: Volume, shape: Sequence[int], pad_value: float = -1000.0) -> Volume:
+    """Centre-crop or centre-pad the volume to ``shape``."""
+    target = tuple(int(s) for s in shape)
+    if len(target) != 3 or any(s <= 0 for s in target):
+        raise ValueError("shape must be three positive ints")
+    src = volume.data
+    out = np.full(target, pad_value, dtype=np.float32)
+    src_slices = []
+    dst_slices = []
+    for cur, tgt in zip(src.shape, target):
+        if cur >= tgt:
+            start = (cur - tgt) // 2
+            src_slices.append(slice(start, start + tgt))
+            dst_slices.append(slice(0, tgt))
+        else:
+            start = (tgt - cur) // 2
+            src_slices.append(slice(0, cur))
+            dst_slices.append(slice(start, start + cur))
+    out[tuple(dst_slices)] = src[tuple(src_slices)]
+    return volume.with_data(out, cropped_to=target)
+
+
+def take_slice(volume: Volume, axis: int, index: int) -> np.ndarray:
+    """Return a 2-D slice, validating the axis and index."""
+    if axis not in (0, 1, 2):
+        raise ValueError("axis must be 0, 1 or 2")
+    size = volume.shape[axis]
+    if not -size <= index < size:
+        raise IndexError(f"slice {index} out of range for axis {axis} (size {size})")
+    return np.take(volume.data, index % size, axis=axis)
