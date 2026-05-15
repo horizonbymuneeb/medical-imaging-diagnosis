@@ -42,3 +42,30 @@ def test_extract_patch_pads_at_border():
         extract_patch(image, (1, 1), 5)
     with pytest.raises(ValueError):
         extract_patch(np.zeros((4, 4, 4)), (1, 1), 4)
+
+
+def test_lesion_components_finds_both_blobs():
+    blobs = lesion_components(two_blob_mask())
+    assert len(blobs) == 2
+    assert [b["voxels"] for b in blobs] == [16, 36]
+    first = min(blobs, key=lambda b: b["centroid"][0])
+    assert first["centroid"] == pytest.approx((6.5, 6.5))
+    assert first["bbox"] == (5, 5, 8, 8)
+
+
+def test_lesion_centers_filters_small_blobs():
+    mask = two_blob_mask()
+    assert len(lesion_centers(mask)) == 2
+    assert len(lesion_centers(mask, min_voxels=20)) == 1
+    with pytest.raises(ValueError):
+        lesion_components(np.zeros((4, 4, 4), dtype=bool))
+
+
+def test_positive_centers_land_on_lesion():
+    mask = two_blob_mask()
+    rng = np.random.default_rng(0)
+    centers = positive_centers(mask, rng, 20)
+    assert len(centers) == 20
+    assert all(mask[r, c] for r, c in centers)
+    with pytest.raises(ValueError):
+        positive_centers(np.zeros((8, 8), dtype=bool), rng, 2)

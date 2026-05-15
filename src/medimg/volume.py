@@ -195,3 +195,11 @@ def take_slice(volume: Volume, axis: int, index: int) -> np.ndarray:
     if not -size <= index < size:
         raise IndexError(f"slice {index} out of range for axis {axis} (size {size})")
     return np.take(volume.data, index % size, axis=axis)
+
+
+def iter_slices(volume: Volume, axis: int = 2) -> Iterator[tuple[int, np.ndarray]]:
+    """Yield ``(index, slice)`` pairs along ``axis``."""
+    if axis not in (0, 1, 2):
+        raise ValueError("axis must be 0, 1 or 2")
+    for index in range(volume.shape[axis]):
+        yield index, take_slice(volume, axis, index)
