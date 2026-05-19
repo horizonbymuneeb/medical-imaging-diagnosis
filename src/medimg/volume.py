@@ -203,3 +203,34 @@ def iter_slices(volume: Volume, axis: int = 2) -> Iterator[tuple[int, np.ndarray
         raise ValueError("axis must be 0, 1 or 2")
     for index in range(volume.shape[axis]):
         yield index, take_slice(volume, axis, index)
+
+
+def volume_stats(volume: Volume) -> dict[str, float]:
+    """Intensity statistics used for normalisation diagnostics."""
+    data = volume.data
+    return {
+        "min": float(data.min()),
+        "max": float(data.max()),
+        "mean": float(data.mean()),
+        "std": float(data.std()),
+        "p01": float(np.percentile(data, 1)),
+        "p99": float(np.percentile(data, 99)),
+        "voxel_volume_mm3": volume.voxel_volume,
+    }
+
+
+def nonzero_bounds(volume: Volume, threshold: float = -900.0) -> tuple[tuple[int, int], ...]:
+    """Bounding box of voxels above ``threshold`` along every axis.
+
+    Useful to crop the air around a head phantom before patch sampling.
+    """
+    mask = volume.data > threshold
+    if not mask.any():
+        raise ValueError("no voxels above threshold")
+    bounds = []
+    for axis in range(3):
+        other = tuple(a for a in range(3) if a != axis)
+        projected = mask.any(axis=other)
+        idx = np.flatnonzero(projected)
+        bounds.append((int(idx[0]), int(idx[-1]) + 1))
+    return tuple(bounds)  # type: ignore[return-value]

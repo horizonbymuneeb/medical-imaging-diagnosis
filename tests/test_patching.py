@@ -69,3 +69,30 @@ def test_positive_centers_land_on_lesion():
     assert all(mask[r, c] for r, c in centers)
     with pytest.raises(ValueError):
         positive_centers(np.zeros((8, 8), dtype=bool), rng, 2)
+
+
+def test_negative_centers_respect_min_distance():
+    mask = two_blob_mask((64, 64))
+    rng = np.random.default_rng(1)
+    centers = negative_centers(mask, rng, 25, patch_size=8, min_distance=10)
+    assert len(centers) == 25
+    rows, cols = np.nonzero(mask)
+    for r, c in centers:
+        d = np.sqrt((rows - r) ** 2 + (cols - c) ** 2).min()
+        assert d >= 10
+
+
+def test_negative_centers_raise_when_lesion_covers_everything():
+    mask = np.ones((16, 16), dtype=bool)
+    rng = np.random.default_rng(2)
+    with pytest.raises(RuntimeError):
+        negative_centers(mask, rng, 5, patch_size=4, max_tries=50)
+
+
+def test_patch_validation():
+    with pytest.raises(ValueError):
+        Patch(image=np.zeros((4, 5), dtype=np.float32), label=0, center=(0, 0))
+    with pytest.raises(ValueError):
+        Patch(image=np.zeros((4, 4, 4), dtype=np.float32), label=0, center=(0, 0))
+    with pytest.raises(ValueError):
+        Patch(image=np.zeros((4, 4), dtype=np.float32), label=2, center=(0, 0))
