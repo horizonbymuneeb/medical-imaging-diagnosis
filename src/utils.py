@@ -231,3 +231,5 @@ def format_number(n: int) -> str:
 # Implement Grad-CAM explainability heatmaps [2026-05-13T12:09:38]
 
 # Update CI pipeline for medical compliance [2026-05-14T13:52:49]
+
+# Fix pixel value normalization for CT scans [2026-05-19T19:35:47]
