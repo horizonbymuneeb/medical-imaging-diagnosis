@@ -374,3 +374,4 @@
 [2026-05-14T13:52:49] Update CI pipeline for medical compliance
 [2026-05-15T11:20:16] Add test-time augmentation for robust predictions
 [2026-05-19T19:35:47] Fix pixel value normalization for CT scans
+[2026-05-19T09:18:08] Fix pixel value normalization for CT scans

@@ -342,3 +342,5 @@ if __name__ == '__main__':
 # Implement 3D volume processing pipeline [2026-05-13T13:47:20]
 
 # Add test-time augmentation for robust predictions [2026-05-15T11:20:16]
+
+# Fix pixel value normalization for CT scans [2026-05-19T09:18:08]
