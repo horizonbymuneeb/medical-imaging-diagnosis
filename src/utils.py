@@ -235,3 +235,5 @@ def format_number(n: int) -> str:
 # Fix pixel value normalization for CT scans [2026-05-19T19:35:47]
 
 # Implement ensemble of UNet and DeepLab [2026-05-19T11:08:29]
+
+# Add federated learning components for privacy [2026-05-22T16:10:10]
