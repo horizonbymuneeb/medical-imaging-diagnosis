@@ -42,3 +42,19 @@ class WindowPreset:
 
     def contains(self, hu: float) -> bool:
         return self.low <= float(hu) <= self.high
+
+
+WINDOW_PRESETS: dict[str, WindowPreset] = {
+    "brain": WindowPreset("brain", level=40.0, width=80.0, description="brain parenchyma"),
+    "lung": WindowPreset("lung", level=-600.0, width=1500.0, description="lung fields"),
+    "abdomen": WindowPreset("abdomen", level=50.0, width=350.0, description="soft tissue"),
+    "bone": WindowPreset("bone", level=400.0, width=1800.0, description="bone detail"),
+}
+
+
+def get_preset(name: str) -> WindowPreset:
+    """Look up a preset, with a helpful error listing the valid names."""
+    try:
+        return WINDOW_PRESETS[name]
+    except KeyError as exc:
+        raise KeyError(f"unknown window preset {name!r}; choose from {sorted(WINDOW_PRESETS)}") from exc

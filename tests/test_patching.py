@@ -96,3 +96,31 @@ def test_patch_validation():
         Patch(image=np.zeros((4, 4, 4), dtype=np.float32), label=0, center=(0, 0))
     with pytest.raises(ValueError):
         Patch(image=np.zeros((4, 4), dtype=np.float32), label=2, center=(0, 0))
+
+
+def test_sampler_balance_is_exact():
+    mask = two_blob_mask((48, 48))
+    image = np.random.default_rng(3).random((48, 48)).astype(np.float32)
+    sampler = PatchSampler(image, mask, patch_size=8, seed=4, positive_fraction=0.5)
+    patches = sampler.sample(20)
+    counts = class_counts(patches)
+    assert counts == {0: 10, 1: 10}
+    assert all(p.image.shape == (8, 8) for p in patches)
+
+
+def test_sampler_positive_only_without_lesion_raises():
+    image = np.zeros((32, 32), dtype=np.float32)
+    mask = np.zeros((32, 32), dtype=bool)
+    sampler = PatchSampler(image, mask, patch_size=8, seed=0)
+    assert not sampler.has_lesion
+    patches = sampler.sample(4)
+    assert class_counts(patches) == {0: 4, 1: 0}
+    with pytest.raises(ValueError):
+        sampler.sample_positive(2)
+
+
+def test_sampler_rejects_mismatched_shapes_and_bad_fraction():
+    with pytest.raises(ValueError):
+        PatchSampler(np.zeros((8, 8)), np.zeros((8, 9), dtype=bool), 4)
+    with pytest.raises(ValueError):
+        PatchSampler(np.zeros((8, 8)), np.zeros((8, 8), dtype=bool), 4, positive_fraction=1.5)
