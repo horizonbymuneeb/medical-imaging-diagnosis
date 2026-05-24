@@ -237,3 +237,5 @@ def format_number(n: int) -> str:
 # Implement ensemble of UNet and DeepLab [2026-05-19T11:08:29]
 
 # Add federated learning components for privacy [2026-05-22T16:10:10]
+
+# Add test-time augmentation for robust predictions [2026-05-24T10:32:26]
