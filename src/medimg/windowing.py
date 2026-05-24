@@ -58,3 +58,31 @@ def get_preset(name: str) -> WindowPreset:
         return WINDOW_PRESETS[name]
     except KeyError as exc:
         raise KeyError(f"unknown window preset {name!r}; choose from {sorted(WINDOW_PRESETS)}") from exc
+
+
+def apply_window(
+    image: np.ndarray,
+    level: float,
+    width: float,
+    *,
+    clip: bool = True,
+    dtype: type = np.float32,
+) -> np.ndarray:
+    """Map HU values to ``[0, 1]`` through the window ``(level, width)``.
+
+    Values below ``level - width/2`` become 0 and above ``level + width/2``
+    become 1.  ``clip=False`` keeps the out-of-range values instead of
+    clamping, which is occasionally useful to inspect what the window hides.
+    """
+    if width <= 0:
+        raise ValueError("width must be positive")
+    low = level - width / 2.0
+    out = (np.asarray(image, dtype=np.float32) - low) / float(width)
+    if clip:
+        out = np.clip(out, 0.0, 1.0)
+    return out.astype(dtype, copy=False)
+
+
+def apply_preset(image: np.ndarray, name: str, **kwargs) -> np.ndarray:
+    preset = get_preset(name)
+    return apply_window(image, preset.level, preset.width, **kwargs)

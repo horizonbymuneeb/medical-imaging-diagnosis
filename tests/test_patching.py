@@ -124,3 +124,33 @@ def test_sampler_rejects_mismatched_shapes_and_bad_fraction():
         PatchSampler(np.zeros((8, 8)), np.zeros((8, 9), dtype=bool), 4)
     with pytest.raises(ValueError):
         PatchSampler(np.zeros((8, 8)), np.zeros((8, 8), dtype=bool), 4, positive_fraction=1.5)
+
+
+def test_balance_patches_upsamples_positives():
+    pos = [Patch(np.ones((4, 4), dtype=np.float32), 1, (0, 0)) for _ in range(2)]
+    neg = [Patch(np.zeros((4, 4), dtype=np.float32), 0, (0, 0)) for _ in range(10)]
+    balanced = balance_patches(pos + neg, seed=0, ratio=1.0)
+    counts = class_counts(balanced)
+    assert counts[0] == 10 and counts[1] == 10
+    with pytest.raises(ValueError):
+        balance_patches(pos + neg, ratio=0.0)
+
+
+def test_split_patches_is_deterministic_and_disjoint():
+    patches = [Patch(np.zeros((4, 4), dtype=np.float32), i % 2, (i, i)) for i in range(20)]
+    train_a, val_a = split_patches(patches, 0.25, seed=5)
+    train_b, val_b = split_patches(patches, 0.25, seed=5)
+    assert len(val_a) == 5 and len(train_a) == 15
+    assert [p.center for p in val_a] == [p.center for p in val_b]
+    assert not {p.center for p in train_a} & {p.center for p in val_a}
+    with pytest.raises(ValueError):
+        split_patches(patches, 0.0)
+
+
+def test_patch_array_shapes_and_labels():
+    patches = [Patch(np.full((4, 4), 1.0, dtype=np.float32), 1, (0, 0)) for _ in range(3)]
+    images, labels = patch_array(patches)
+    assert images.shape == (3, 1, 4, 4)
+    assert labels.tolist() == [1.0, 1.0, 1.0]
+    with pytest.raises(ValueError):
+        patch_array([])
