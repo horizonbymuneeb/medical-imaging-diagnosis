@@ -107,3 +107,35 @@ def minmax_normalize(image: np.ndarray, *, eps: float = 1e-6) -> np.ndarray:
     if hi - lo < eps:
         return np.zeros_like(arr)
     return (arr - lo) / (hi - lo)
+
+
+def zscore_normalize(image: np.ndarray, *, eps: float = 1e-6) -> np.ndarray:
+    """Standardise to zero mean and unit variance."""
+    arr = np.asarray(image, dtype=np.float32)
+    mean = float(arr.mean())
+    std = float(arr.std())
+    if std < eps:
+        return np.zeros_like(arr)
+    return (arr - mean) / std
+
+
+def percentile_normalize(
+    image: np.ndarray,
+    low: float = 1.0,
+    high: float = 99.0,
+    *,
+    eps: float = 1e-6,
+) -> np.ndarray:
+    """Robust normalisation that ignores the brightest/darkest outliers.
+
+    A single metal-artefact voxel at 3000 HU would otherwise compress the whole
+    brain into the bottom 2 % of the range.
+    """
+    if not 0.0 <= low < high <= 100.0:
+        raise ValueError("require 0 <= low < high <= 100")
+    arr = np.asarray(image, dtype=np.float32)
+    lo = float(np.percentile(arr, low))
+    hi = float(np.percentile(arr, high))
+    if hi - lo < eps:
+        return np.zeros_like(arr)
+    return np.clip((arr - lo) / (hi - lo), 0.0, 1.0)
