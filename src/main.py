@@ -346,3 +346,5 @@ if __name__ == '__main__':
 # Fix pixel value normalization for CT scans [2026-05-19T09:18:08]
 
 # Implement 3D volume processing pipeline [2026-05-26T14:53:12]
+
+# Add federated learning components for privacy [2026-05-26T09:04:45]
