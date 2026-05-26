@@ -86,3 +86,24 @@ def apply_window(
 def apply_preset(image: np.ndarray, name: str, **kwargs) -> np.ndarray:
     preset = get_preset(name)
     return apply_window(image, preset.level, preset.width, **kwargs)
+
+
+def window_batch(images: Iterable[np.ndarray], level: float, width: float) -> np.ndarray:
+    """Window a sequence of 2-D images into one ``(N, H, W)`` array."""
+    stacked = [apply_window(img, level, width) for img in images]
+    if not stacked:
+        raise ValueError("window_batch needs at least one image")
+    shapes = {img.shape for img in stacked}
+    if len(shapes) != 1:
+        raise ValueError(f"all images must share a shape, got {sorted(shapes)}")
+    return np.stack(stacked, axis=0)
+
+
+def minmax_normalize(image: np.ndarray, *, eps: float = 1e-6) -> np.ndarray:
+    """Scale to ``[0, 1]`` using the observed min and max."""
+    arr = np.asarray(image, dtype=np.float32)
+    lo = float(arr.min())
+    hi = float(arr.max())
+    if hi - lo < eps:
+        return np.zeros_like(arr)
+    return (arr - lo) / (hi - lo)
