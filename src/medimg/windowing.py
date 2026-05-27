@@ -139,3 +139,17 @@ def percentile_normalize(
     if hi - lo < eps:
         return np.zeros_like(arr)
     return np.clip((arr - lo) / (hi - lo), 0.0, 1.0)
+
+
+NORMALIZERS = {
+    "minmax": minmax_normalize,
+    "zscore": zscore_normalize,
+    "percentile": percentile_normalize,
+}
+
+
+def normalize_array(image: np.ndarray, mode: str = "minmax", **kwargs) -> np.ndarray:
+    """Dispatch to one of the registered normalisers."""
+    if mode not in NORMALIZERS:
+        raise KeyError(f"unknown normalisation mode {mode!r}; choose from {sorted(NORMALIZERS)}")
+    return NORMALIZERS[mode](image, **kwargs)
