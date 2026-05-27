@@ -348,3 +348,5 @@ if __name__ == '__main__':
 # Implement 3D volume processing pipeline [2026-05-26T14:53:12]
 
 # Add federated learning components for privacy [2026-05-26T09:04:45]
+
+# Add MONAI transforms for medical images [2026-05-27T16:10:27]
