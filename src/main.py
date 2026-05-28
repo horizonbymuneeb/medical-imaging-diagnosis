@@ -350,3 +350,5 @@ if __name__ == '__main__':
 # Add federated learning components for privacy [2026-05-26T09:04:45]
 
 # Add MONAI transforms for medical images [2026-05-27T16:10:27]
+
+# Implement ensemble of UNet and DeepLab [2026-05-28T20:32:24]
