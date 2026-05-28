@@ -153,3 +153,17 @@ def normalize_array(image: np.ndarray, mode: str = "minmax", **kwargs) -> np.nda
     if mode not in NORMALIZERS:
         raise KeyError(f"unknown normalisation mode {mode!r}; choose from {sorted(NORMALIZERS)}")
     return NORMALIZERS[mode](image, **kwargs)
+
+
+def normalize_volume(volume: Volume, mode: str = "minmax", **kwargs) -> Volume:
+    """Normalise a whole volume, keeping the metadata intact."""
+    out = normalize_array(volume.data, mode, **kwargs)
+    return volume.with_data(out, normalization=mode)
+
+
+def invert_window(image: np.ndarray) -> np.ndarray:
+    """Invert an already-windowed image (``x -> 1 - x``)."""
+    arr = np.asarray(image, dtype=np.float32)
+    if arr.min() < -1e-6 or arr.max() > 1.0 + 1e-6:
+        raise ValueError("invert_window expects values already in [0, 1]")
+    return (1.0 - arr).astype(np.float32)

@@ -29,3 +29,26 @@ from src.medimg.phantom import (
     shell_mask,
     voxel_grid,
 )
+
+
+def small_cfg(**kwargs) -> PhantomConfig:
+    base = dict(shape=(32, 32, 24), spacing=(1.0, 1.0, 2.0), noise_sigma=0.0, seed=3)
+    base.update(kwargs)
+    return PhantomConfig(**base)
+
+
+def test_config_rejects_invalid_geometry():
+    with pytest.raises(ValueError):
+        PhantomConfig(shape=(32, 32))
+    with pytest.raises(ValueError):
+        PhantomConfig(spacing=(1.0, 0.0, 1.0))
+    with pytest.raises(ValueError):
+        PhantomConfig(noise_sigma=-1.0)
+    with pytest.raises(ValueError):
+        PhantomConfig(noise_model="poisson")
+
+
+def test_lesion_radius_converts_mm_to_voxels():
+    cfg = PhantomConfig(shape=(64, 64, 48), spacing=(1.5, 2.0, 4.0), lesion_radius_mm=6.0)
+    assert cfg.lesion_radius_voxels == (4.0, 3.0, 1.5)
+    assert cfg.voxel_volume_mm3 == pytest.approx(12.0)
