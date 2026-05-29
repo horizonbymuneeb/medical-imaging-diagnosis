@@ -167,3 +167,23 @@ def invert_window(image: np.ndarray) -> np.ndarray:
     if arr.min() < -1e-6 or arr.max() > 1.0 + 1e-6:
         raise ValueError("invert_window expects values already in [0, 1]")
     return (1.0 - arr).astype(np.float32)
+
+
+def window_statistics(image: np.ndarray, level: float, width: float) -> dict[str, float]:
+    """How much of an image the window actually uses.
+
+    A clipped fraction near 1 means the window is far too narrow for this
+    tissue and the CNN would see a binary mask.
+    """
+    arr = np.asarray(image, dtype=np.float32)
+    low = level - width / 2.0
+    high = level + width / 2.0
+    below = float((arr < low).mean())
+    above = float((arr > high).mean())
+    return {
+        "clipped_low": below,
+        "clipped_high": above,
+        "usable_fraction": float(1.0 - below - above),
+        "window_low": low,
+        "window_high": high,
+    }
