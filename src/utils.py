@@ -239,3 +239,5 @@ def format_number(n: int) -> str:
 # Add federated learning components for privacy [2026-05-22T16:10:10]
 
 # Add test-time augmentation for robust predictions [2026-05-24T10:32:26]
+
+# Update inference pipeline for batch DICOM [2026-05-29T10:47:26]
