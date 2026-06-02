@@ -105,3 +105,82 @@ def test_brain_phantom_is_deterministic_per_seed():
     assert np.array_equal(a, b)
     assert np.array_equal(ma, mb)
     assert not np.array_equal(ma, mc)
+
+
+def test_noise_changes_values_but_not_geometry():
+    clean, mask_clean = brain_phantom(small_cfg(noise_sigma=0.0))
+    noisy, mask_noisy = brain_phantom(small_cfg(noise_sigma=10.0))
+    assert np.array_equal(mask_clean, mask_noisy)
+    assert not np.allclose(clean, noisy)
+    assert abs(float(noisy.mean()) - float(clean.mean())) < 3.0
+
+
+def test_add_gaussian_noise_std_and_mask():
+    rng = np.random.default_rng(0)
+    base = np.zeros((64, 64), dtype=np.float32)
+    noisy = add_gaussian_noise(base, 5.0, rng)
+    assert noisy.std() == pytest.approx(5.0, rel=0.08)
+    mask = np.zeros((64, 64), dtype=bool)
+    mask[:8, :8] = True
+    partial = add_gaussian_noise(base, 5.0, rng, mask=mask)
+    assert np.allclose(partial[8:, 8:], 0.0)
+    assert partial[:8, :8].std() > 1.0
+
+
+def test_add_rician_noise_is_non_negative():
+    rng = np.random.default_rng(1)
+    base = np.full((16, 16), 100.0, dtype=np.float32)
+    noisy = add_rician_noise(base, 5.0, rng)
+    assert noisy.min() >= 0.0
+    assert noisy.mean() == pytest.approx(100.0, abs=1.5)
+    with pytest.raises(ValueError):
+        add_rician_noise(base, -1.0, rng)
+
+
+def test_lesion_mask_and_draw_lesion_agree():
+    shape = (24, 24, 16)
+    lesion = Lesion(center=(12, 12, 8), radius=(3.0, 3.0, 2.0))
+    mask = lesion.mask(shape)
+    data = np.zeros(shape, dtype=np.float32)
+    painted = draw_lesion(data, lesion)
+    assert np.array_equal(painted > 0, mask)
+    assert painted[mask].max() == pytest.approx(HU_LESION)
+    blended = draw_lesion(data + 40.0, lesion, blend=True)
+    assert blended[mask].max() == pytest.approx(HU_LESION + 40.0)
+
+
+def test_random_lesion_center_stays_inside_head():
+    cfg = small_cfg()
+    rng = np.random.default_rng(2)
+    center = head_center(cfg.shape)
+    for _ in range(10):
+        lesion_center = random_lesion_center(cfg, rng)
+        distance = np.linalg.norm(np.array(lesion_center) - np.array(center))
+        assert distance < min(cfg.shape) / 2.0
+
+
+def test_lesion_slice_index_returns_densest_slice():
+    mask = np.zeros((8, 8, 6), dtype=bool)
+    mask[3:5, 3:5, 4] = True
+    assert lesion_slice_index(mask, axis=2) == 4
+    with pytest.raises(ValueError):
+        lesion_slice_index(np.zeros((4, 4), dtype=bool))
+
+
+def test_phantom_slice_validates_axis_and_index():
+    volume, _ = make_phantom_pair(small_cfg())
+    sl = phantom_slice(volume, axis=2, index=0)
+    assert sl.shape == (32, 32)
+    assert phantom_slice(volume, axis=2).shape == (32, 32)
+    with pytest.raises(IndexError):
+        phantom_slice(volume, axis=2, index=99)
+    with pytest.raises(ValueError):
+        phantom_slice(volume, axis=7)
+
+
+def test_phantom_summary_reports_positive_volumes():
+    summary = phantom_summary(small_cfg())
+    assert summary["voxels"] == 32 * 32 * 24
+    assert summary["lesion_voxels"] > 0
+    assert summary["lesion_mm3"] == pytest.approx(summary["lesion_voxels"] * 2.0)
+    assert summary["hu_min"] <= HU_AIR + 1e-3
