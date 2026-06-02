@@ -241,3 +241,5 @@ def format_number(n: int) -> str:
 # Add test-time augmentation for robust predictions [2026-05-24T10:32:26]
 
 # Update inference pipeline for batch DICOM [2026-05-29T10:47:26]
+
+# WIP: benchmarking on NIH Chest X-ray dataset [2026-06-02T15:13:55]
