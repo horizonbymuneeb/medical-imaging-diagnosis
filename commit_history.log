@@ -384,3 +384,4 @@
 [2026-05-28T20:32:24] Implement ensemble of UNet and DeepLab
 [2026-05-29T10:47:26] Update inference pipeline for batch DICOM
 [2026-06-02T15:13:55] WIP: benchmarking on NIH Chest X-ray dataset
+[2026-06-02T09:42:51] Update documentation for clinical deployment
