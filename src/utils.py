@@ -243,3 +243,5 @@ def format_number(n: int) -> str:
 # Update inference pipeline for batch DICOM [2026-05-29T10:47:26]
 
 # WIP: benchmarking on NIH Chest X-ray dataset [2026-06-02T15:13:55]
+
+# Update CI pipeline for medical compliance [2026-06-07T11:09:37]
