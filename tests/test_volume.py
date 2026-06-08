@@ -79,3 +79,76 @@ def test_resample_to_spacing_changes_shape_proportionally():
     assert resampled.shape[0] == pytest.approx(4, abs=1)
     assert resampled.shape[2] == pytest.approx(6, abs=1)
     assert resampled.meta["resampled_to"] == (2.0, 2.0, 2.0)
+
+
+def test_resample_is_noop_at_same_spacing():
+    volume = make_volume()
+    assert resample_to_spacing(volume, volume.spacing) is volume
+    with pytest.raises(ValueError):
+        resample_to_spacing(volume, (1.0, 1.0))
+
+
+def test_crop_or_pad_both_directions():
+    volume = make_volume(shape=(8, 8, 8))
+    cropped = crop_or_pad(volume, (4, 4, 4))
+    assert cropped.shape == (4, 4, 4)
+    padded = crop_or_pad(volume, (10, 10, 10), pad_value=-1000.0)
+    assert padded.shape == (10, 10, 10)
+    assert padded.data[0, 0, 0] == pytest.approx(-1000.0)
+    assert padded.data[1:9, 1:9, 1:9].shape == (8, 8, 8)
+    assert np.array_equal(padded.data[1:9, 1:9, 1:9], volume.data)
+    with pytest.raises(ValueError):
+        crop_or_pad(volume, (0, 4, 4))
+
+
+def test_take_slice_and_negative_index():
+    volume = make_volume(shape=(4, 5, 6))
+    assert take_slice(volume, 2, 0).shape == (4, 5)
+    assert np.array_equal(take_slice(volume, 2, -1), take_slice(volume, 2, 5))
+    with pytest.raises(IndexError):
+        take_slice(volume, 2, 6)
+    with pytest.raises(ValueError):
+        take_slice(volume, 5, 0)
+
+
+def test_iter_slices_yields_every_index():
+    volume = make_volume(shape=(4, 4, 5))
+    pairs = list(iter_slices(volume, axis=2))
+    assert [index for index, _ in pairs] == [0, 1, 2, 3, 4]
+    assert all(slice_.shape == (4, 4) for _, slice_ in pairs)
+
+
+def test_volume_stats_match_numpy():
+    volume = make_volume()
+    stats = volume_stats(volume)
+    assert stats["min"] == pytest.approx(float(volume.data.min()))
+    assert stats["max"] == pytest.approx(float(volume.data.max()))
+    assert stats["mean"] == pytest.approx(float(volume.data.mean()))
+    assert stats["std"] == pytest.approx(float(volume.data.std()))
+    assert stats["p01"] <= stats["p99"]
+
+
+def test_validate_volume_catches_nan_and_anisotropy():
+    ok = make_volume()
+    validate_volume(ok)
+    with pytest.raises(ValueError):
+        validate_volume(Volume(data=np.full((4, 4, 4), np.nan), spacing=(1, 1, 1)))
+    with pytest.raises(ValueError):
+        validate_volume(Volume(data=np.zeros((4, 4, 4)), spacing=(1, 1, 20)))
+    with pytest.raises(ValueError):
+        validate_volume(Volume(data=np.zeros((4, 4, 4)), modality="XX"))
+
+
+def test_nonzero_bounds_returns_tight_box():
+    data = np.zeros((10, 10, 10), dtype=np.float32)
+    data[2:5, 3:7, 1:9] = 100.0
+    bounds = nonzero_bounds(Volume(data=data), threshold=50.0)
+    assert bounds == ((2, 5), (3, 7), (1, 9))
+    with pytest.raises(ValueError):
+        nonzero_bounds(Volume(data=np.zeros((4, 4, 4))), threshold=50.0)
+
+
+def test_as_volume_wraps_array():
+    volume = as_volume(np.zeros((3, 3, 3)))
+    assert volume.spacing == (1.0, 1.0, 1.0)
+    assert volume.modality == "CT"
