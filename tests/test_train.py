@@ -115,3 +115,45 @@ def test_train_one_epoch_reduces_loss_on_separable_data():
     assert np.isfinite(first) and np.isfinite(last)
     with pytest.raises(ValueError):
         train_one_epoch(model, DataLoader([], batch_size=1), optimizer, criterion)
+
+
+def test_evaluate_epoch_returns_probabilities_and_loss():
+    model = make_model(base_channels=2, dropout=0.0, seed=1)
+    loader = toy_loader(8, 4)
+    out = evaluate_epoch(model, loader, torch.nn.BCEWithLogitsLoss())
+    assert out["probs"].shape == (8,)
+    assert out["labels"].shape == (8,)
+    assert np.isfinite(out["loss"])
+    probs_only = evaluate_epoch(model, loader, None)
+    assert np.isnan(probs_only["loss"])
+    assert probs_only["probs"].shape == (8,)
+
+
+def test_fit_runs_early_stopping_and_restores():
+    cfg_phantom = PhantomConfig(shape=(32, 32, 24), noise_sigma=5.0, seed=2)
+    specs = build_specs(10, seed=3)
+    train_loader, val_loader = make_dataloaders(
+        specs, batch_size=4, patch_size=16, cfg=cfg_phantom, augment=None, seed=1
+    )
+    model = make_model(base_channels=4, dropout=0.0, patch_size=16, seed=0)
+    cfg = TrainConfig(epochs=2, batch_size=4, lr=0.01, patience=1, seed=1)
+    history = fit(model, train_loader, val_loader, cfg)
+    assert history["epochs_run"] >= 1
+    assert len(history["train_loss"]) == history["epochs_run"]
+    assert history["best_epoch"] >= 0
+    assert history["val_probs"].shape == history["val_labels"].shape
+    assert history["val_probs"].size == len(val_loader.dataset)
+    assert np.isfinite(history["best_val_loss"])
+    assert history["seconds"] >= 0.0
+    assert history["early_stopping"]["mode"] == "min"
+    first_batch = next(iter(val_loader))
+    probs = predict_proba(model, first_batch["image"])
+    assert np.allclose(probs, history["val_probs"][: len(probs)], atol=1e-6)
+
+
+def test_set_seed_makes_torch_deterministic():
+    set_seed(123)
+    a = torch.randn(4)
+    set_seed(123)
+    b = torch.randn(4)
+    assert torch.equal(a, b)
