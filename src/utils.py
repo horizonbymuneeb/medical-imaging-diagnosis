@@ -245,3 +245,5 @@ def format_number(n: int) -> str:
 # WIP: benchmarking on NIH Chest X-ray dataset [2026-06-02T15:13:55]
 
 # Update CI pipeline for medical compliance [2026-06-07T11:09:37]
+
+# Fix pixel value normalization for CT scans [2026-06-08T17:06:57]
