@@ -389,3 +389,4 @@
 [2026-06-07T11:09:37] Update CI pipeline for medical compliance
 [2026-06-08T17:06:57] Fix pixel value normalization for CT scans
 [2026-06-08T16:20:19] WIP: fixing data augmentation pipeline bug
+[2026-06-08T09:33:40] Add DICOM loader with metadata extraction

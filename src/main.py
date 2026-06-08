@@ -358,3 +358,5 @@ if __name__ == '__main__':
 # Implement 3D volume processing pipeline [2026-06-05T09:45:27]
 
 # WIP: fixing data augmentation pipeline bug [2026-06-08T16:20:19]
+
+# Add DICOM loader with metadata extraction [2026-06-08T09:33:40]
