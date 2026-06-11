@@ -118,3 +118,12 @@ def test_invert_window_flips_and_validates():
     assert invert_window(image).tolist() == pytest.approx([1.0, 0.75, 0.0])
     with pytest.raises(ValueError):
         invert_window(np.array([-0.5, 0.5], dtype=np.float32))
+
+
+def test_window_statistics_reports_clipped_fraction():
+    image = np.array([-1000.0, -1000.0, 40.0, 40.0], dtype=np.float32)
+    stats = window_statistics(image, 40.0, 80.0)
+    assert stats["clipped_low"] == pytest.approx(0.5)
+    assert stats["clipped_high"] == pytest.approx(0.0)
+    assert stats["usable_fraction"] == pytest.approx(0.5)
+    assert stats["window_low"] == 0.0 and stats["window_high"] == 80.0
