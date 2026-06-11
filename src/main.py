@@ -362,3 +362,5 @@ if __name__ == '__main__':
 # Add DICOM loader with metadata extraction [2026-06-08T09:33:40]
 
 # Implement ensemble of UNet and DeepLab [2026-06-10T10:30:00]
+
+# WIP: fixing data augmentation pipeline bug [2026-06-11T12:37:07]
